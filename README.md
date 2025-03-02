@@ -1,4 +1,4 @@
-<img src="./src/assets/ng-logo.png" style="width: 200px; padding: 12px; display: block; margin: auto" />
+<img src="./src/assets/ng-logo.svg" style="width: 200px; padding: 12px; display: block; margin: auto" />
 
 # Angular Guide - ანგულარის (არაოფიციალური) ქართული გზამკვლევი
 

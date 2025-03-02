@@ -2,7 +2,7 @@
 title: "ანგულარის ქართული გზამკვლევი"
 ---
 
-<img src="./assets/ng-logo.png" id="ng-landing-logo" alt="Angular logo" style="max-width: 200px; display: block; margin: 1rem auto 0 auto;" />
+<img src="./assets/ng-logo.svg" id="ng-landing-logo" alt="Angular logo" style="max-width: 200px; display: block; margin: 1rem auto 0 auto;" />
 
 # ანგულარის ქართული გზამკვლევი
 
