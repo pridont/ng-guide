@@ -1,0 +1,14 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "ng-guide",
+  "compatibility_date": "2026-07-28",
+  "assets": {
+    // Eleventy's output directory (see `dir.output` in .eleventy.js)
+    "directory": "./public",
+    // Serve src/404.njk for unmatched paths instead of a bare 404
+    "not_found_handling": "404-page"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

@@ -1,2 +1,7 @@
 node_modules/
 public/
+
+# cloudflare / wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*

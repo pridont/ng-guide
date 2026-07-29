@@ -2,11 +2,17 @@
   "name": "ng-guide",
   "version": "1.0.0",
   "description": "The Unofficial Georgian Angular Guide",
+  "packageManager": "pnpm@11.0.4",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "eleventy --serve",
     "build": "eleventy",
     "build:quiet": "eleventy --quiet",
+    "preview": "wrangler dev",
+    "deploy": "pnpm run build && wrangler deploy",
     "preinstall": "npx only-allow pnpm"
   },
   "author": "Pridon Tetradze",
@@ -14,10 +20,12 @@
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
     "@11ty/eleventy-plugin-rss": "^1.2.0",
-    "child_process": "^1.0.2",
     "highlight.js": "^11.8.0",
+    "luxon": "^3.4.4",
+    "markdown-it": "^13.0.2",
     "markdown-it-anchor": "^8.6.7",
     "markdown-it-highlightjs": "^4.0.1",
-    "pagefind": "^0.12.0"
+    "pagefind": "^1.5.2",
+    "wrangler": "^4.114.0"
   }
 }
