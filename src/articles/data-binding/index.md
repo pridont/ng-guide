@@ -9,5 +9,7 @@ title: "Data Binding - მონაცემების მიბმა"
 ან ატრიბუტები და ასევე მოვუსმინოთ მათზე არსებულ მოვლენებს.
 
 - [Poperty & attribute binding](./property-and-attribute-binding.html) - ელემენტის თვისებებსა და ატრიბუტზე მონაცემების მიბმა;
-- [Input & Output დეკორატორები](./input-output.html) - დატა ბაინდინგი კომპონენტის პერსპექტივიდან;
-- [Two-way binding](./two-way-binding.html) - დატა ბაინდინგისა და ივენთ ბაინდინგის კომბინაცია.
+- [Input & Output](./input-output.html) - დატა ბაინდინგი კომპონენტის პერსპექტივიდან;
+- [Two-way binding](./two-way-binding.html) - დატა ბაინდინგისა და ივენთ ბაინდინგის კომბინაცია;
+- [Content Projection](./content-projection.html) - მარკაპის გადაცემა კომპონენტისთვის;
+- [Queries](./queries.html) - შვილ კომპონენტებზე პირდაპირი წვდომა.

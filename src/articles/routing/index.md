@@ -18,4 +18,5 @@ Single page application-ში ჩვენ მომხმარებლის
 
 - [მარტივ routing-ს](./basic-routing.html)
 - [Child routing-ს](./child-routing.html) - ანუ რაუთინგს რაუთინგის შიგნით!
-- და [დინამიკურ route-ებთან მუშაობას](./dynamic-routes/).
+- [დინამიკურ route-ებთან მუშაობას](./dynamic-routes/)
+- და [Data Resolvers-ს](./data-resolvers.html) - მონაცემების ჩამოტვირთვას ნავიგაციამდე.

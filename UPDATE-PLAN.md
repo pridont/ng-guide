@@ -274,7 +274,7 @@ isTokenExpired() {
 
 v21-ის მთავარი თემები, რომლებიც წიგნში **საერთოდ არ არის**:
 
-**პრიორიტეტი A (ბირთვი, აუცილებელი):**
+**პრიორიტეტი A (ბირთვი, აუცილებელი) — ✅ დასრულებული:**
 1. `@defer` — deferrable views (`guide/templates/defer.md`)
 2. `@let` — template variables (`guide/templates/variables.md`)
 3. Signal queries — `viewChild`/`viewChildren`/`contentChild` (`guide/components/queries.md`)
@@ -283,7 +283,7 @@ v21-ის მთავარი თემები, რომლებიც �
 6. Zoneless change detection (`guide/zoneless.md`) — v21-ში default
 7. RxJS interop — `toSignal`/`toObservable`/`rxResource` (`ecosystem/rxjs-interop/`)
 
-**პრიორიტეტი B (მნიშვნელოვანი):**
+**პრიორიტეტი B (მნიშვნელოვანი) — 8, 10, 11 ✅ დასრულებული:**
 8. Signal Forms — `form()`, `[formField]`, schemas, validation
    (`guide/forms/signals/*` — 16 ფაილი adev-ში, production ready)
 9. SSR + Hydration + Incremental hydration (`guide/ssr.md`, `guide/incremental-hydration.md`)
@@ -314,7 +314,25 @@ v21-ის მთავარი თემები, რომლებიც �
 18. Performance / `@defer` + `ChangeDetectionStrategy.OnPush`
 19. AI-assisted Angular — `llms.txt`, Angular MCP server, agent skills (`ai/*`)
 
-### ფაზა 4. სარჩევის რესტრუქტურიზაცია (~1 დღე)
+### ფაზა 4. სარჩევის რესტრუქტურიზაცია — ✅ დასრულებული
+
+**შესრულებული სახე** (განსხვავდება ქვემოთ მოცემული პირვანდელი ესკიზისგან —
+იმ თავებისთვის, რომლებიც ჯერ არ დაწერილა, ნავიგაციაში ჩანაწერი არ დამატებულა):
+
+- **სიგნალები** "ბონუსებიდან" ამოვიდა და შესავლის შემდეგ დგას (print-ის
+  რიგშიც #6-ია)
+- **Host ელემენტი** "ბონუსებიდან" Data Binding-ში გადავიდა
+- **Tests** და **Deployment** "ბონუსებიდან" "გაფართოებულში" გადავიდა
+- **Standalone** "ბონუსებიდან" ახალ **Legacy** სექციაში გადავიდა, `NgModule`-თან ერთად
+- **Routing** და **Forms** "ფუნდამენტებიდან" "აპლიკაციის აწყობაში" გადავიდა
+- `standalone/routing-and-lazy-loading` აღარ დუბლირდება — ის Routing-ის ქვეშაა,
+  რადგან შიგთავსი legacy არ არის
+- "ბექ-ენდთან მუშაობა" → "აპლიკაციის აწყობა" (ახლა Routing-საც და Forms-საც ფარავს)
+
+`introduction/interpolation-data-binding.md`-ის ბოლო ლინკი სიგნალებზე
+გადამისამართდა, ხოლო `signals`, `at-host` და `control-flow/defer` თავებს
+"შემდეგი თავის" ლინკები დაემატა.
+
 
 `src/includes/partials/SUMMARY.md` — ახალი რიგი:
 
