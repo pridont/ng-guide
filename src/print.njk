@@ -5,9 +5,9 @@ description: "ისწავლე Angular-ის ფუნდამენტ�
 permalink: "print.html"
 ---
 {%- for article in collections.sortedArticles -%}
-    <article>
+    <section class="chapter">
         {{ article.content | safe }}
-    </article>
+    </section>
 {%- endfor -%}
 <script>
     window.print();

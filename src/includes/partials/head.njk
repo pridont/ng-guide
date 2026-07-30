@@ -1,27 +1,46 @@
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>{{ title }} - Angular Guide</title>
+  <meta name="description" content="{{ description }}">
+  <meta name="color-scheme" content="dark light">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:image" content="/assets/cover.jpg">
+  <meta property="og:description" content="Angular-ის ქართული არაოფიციალური სახელმძღვანელო. ისწავლე ანგულარის საფუძვლები ქართულ ენაზე.">
+
+  <link rel="icon" href="/assets/favicon-32x32.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="/styles/main.css" />
   <link rel="stylesheet" href="/styles/animations.css" />
   <link rel="stylesheet" href="/styles/elements/article.css">
   <link rel="stylesheet" href="/styles/elements/header.css">
   <link rel="stylesheet" href="/styles/elements/footer.css">
   <link rel="stylesheet" href="/styles/elements/search.css">
+  <link rel="stylesheet" href="/styles/highlight-theme.css">
   <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
   <link rel="stylesheet" href="/styles/print.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Noto+Sans+Georgian:wght@100;200;300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  {# <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16x16.png"> #}
-  <link rel="icon" href="/assets/favicon-32x32.png">
+
+  {# Applied before first paint so the stored theme never flashes. #}
+  <script>
+    (function () {
+      // Gates controls that only work with scripting, e.g. copy-to-clipboard.
+      document.documentElement.dataset.js = "on";
+      try {
+        var stored = localStorage.getItem("theme");
+        var dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme =
+          stored || (dark ? "dark" : "light");
+      } catch (e) {
+        document.documentElement.dataset.theme = "dark";
+      }
+    })();
+  </script>
+
   <script type="module" src="/scripts/main.js"></script>
   <script defer src="/pagefind/pagefind-ui.js" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
-  <meta property="og:title" content="{{ title }}">
-  <meta property="og:image" content="/assets/cover.jpg">
-  <meta property="og:description" content="Angular-ის ქართული არაოფიციალური სახელმძღვანელო. ისწავლე ანგულარის საფუძვლები ქართულ ენაზე.">
-  <meta name="description" content="{{ description }}">
-  <link rel="stylesheet" href="/styles/highlight-theme.css">
-  <title>{{ title }} - Angular Guide</title>
 </head>

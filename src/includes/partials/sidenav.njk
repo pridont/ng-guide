@@ -1,6 +1,3 @@
-<aside>
-    <nav>
-        {% set snippet %}{% include 'SUMMARY.md' %}{% endset %}
-        {{ snippet | summary(page) | safe }}
-    </nav>
-</aside>
+<nav class="sidenav" id="sidenav" aria-label="სახელმძღვანელოს სარჩევი">
+  {{ page | sidenav | safe }}
+</nav>

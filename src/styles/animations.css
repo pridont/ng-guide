@@ -1,25 +1,11 @@
-/* This is too heavy */
-@keyframes radiance {
-  0% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 20% 50%;
-  }
-  100% {
-    background-position: 0% 100%;
-  }
-}
-
 @keyframes blink {
-  50% {
+  0%,
+  49% {
     opacity: 1;
   }
-}
-
-@-webkit-keyframes blink {
-  50% {
-    opacity: 1;
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 
@@ -32,11 +18,13 @@
   }
 }
 
-@keyframes slide_out {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-100%);
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

@@ -1,32 +1,40 @@
-<header class="main-header">
-  <div class="path">
-    {% include "_menu.njk"%}
-    <span>/angular-guide</span>
-    <span class="prompt">&gt;</span>
-    <span class="blinker">_</span>
-  </div>
-  <div class="right">
-    <nav>
-      <ul>
-        {# Semantically should not be here, but whatever #}
-        <li>
-          <button id="search-toggler">
-            {% include "_search.njk" %}
-          </button>
-        </li>
-        <li>
-          <a href="https://github.com/CondensedMilk7/ng-guide">
-            {% include "_github.njk" %}
-          </a>
-        </li>
-        <li>
-          <button id="theme-switch" aria-label="color theme switch">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-              <path fill="#fff" stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
-            </svg>
-          </button>    
-        </li>
-      </ul>
-    </nav>
+<header class="topbar">
+  <div class="topbar__inner">
+    <div class="topbar__left">
+      <button
+        class="iconbtn"
+        id="menu-btn"
+        type="button"
+        aria-label="სარჩევის ჩვენება/დამალვა"
+        aria-controls="sidenav"
+        aria-expanded="true"
+      >
+        <svg width="17" height="12" viewBox="0 0 17 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+          <line x1="1" y1="1" x2="16" y2="1"></line>
+          <line x1="1" y1="6" x2="16" y2="6"></line>
+          <line x1="1" y1="11" x2="16" y2="11"></line>
+        </svg>
+      </button>
+
+      <a class="brand" href="/">
+        <span>/angular-guide</span>
+        <span class="brand__sep">&rsaquo;</span>
+        <span class="brand__caret">_</span>
+      </a>
+    </div>
+
+    <div class="topbar__right">
+      <button class="searchpill" id="search-toggler" type="button" aria-label="ძებნა" aria-expanded="false">
+        {% include "_search.njk" %}
+        <span class="searchpill__label">ძებნა</span>
+        <kbd>⌘K</kbd>
+      </button>
+
+      <a class="iconbtn" href="https://github.com/CondensedMilk7/ng-guide" aria-label="GitHub" rel="noopener">
+        {% include "_github.njk" %}
+      </a>
+
+      <button class="iconbtn" id="theme-switch" type="button" aria-label="თემის გადართვა"></button>
+    </div>
   </div>
 </header>

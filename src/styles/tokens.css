@@ -1,0 +1,75 @@
+/*
+ * Design tokens for the guide. Dark is the default; `body.light` flips them.
+ * Values come from the Angular Guide design system (apricot / lilac / cyan on
+ * a plum-tinted neutral ramp).
+ */
+:root {
+  --bg: #120f15;
+  --panel: #1f1826;
+  --fg: #ece6f1;
+  --muted: #a196aa;
+  --rule: rgba(236, 230, 241, 0.1);
+  --rule-strong: rgba(236, 230, 241, 0.16);
+
+  --apricot: #e6a878;
+  --lilac: #c39fe0;
+  --cyan: #79c6cf;
+
+  --accent: var(--apricot);
+  --link: var(--lilac);
+
+  --syn-comment: #8c7f96;
+  --syn-keyword: #c39fe0;
+  --syn-function: #79c6cf;
+  --syn-string: #b7cf98;
+  --syn-number: #e6a878;
+  --syn-class: #e0c06f;
+  --syn-property: #e69bb0;
+  --syn-punct: #a196aa;
+
+  /* Scrollbar thumb at rest — quiet, but still readable as an affordance. */
+  --rail: rgba(236, 230, 241, 0.28);
+
+  --shadow-drawer: 0 30px 70px -30px rgba(0, 0, 0, 0.7);
+
+  /* Layout */
+  --header-h: 4.25rem;
+  --shell-max: 104rem;
+  --shell-pad: 2rem;
+  --sidenav-w: 17.5rem;
+  --toc-w: 15rem;
+  --measure: 44rem;
+
+  --font-sans: "Hanken Grotesk", "Noto Sans Georgian", system-ui, sans-serif;
+  --font-mono: "DM Mono", "Noto Sans Georgian", ui-monospace, monospace;
+
+  /* Kept for backwards compatibility with older inline styles in articles. */
+  --font-default: var(--font-sans);
+  --font-monospace: var(--font-mono);
+  --inline-code-clr: var(--apricot);
+}
+
+:root[data-theme="light"] {
+  --bg: #f1ecf1;
+  --panel: #faf6fa;
+  --fg: #221a29;
+  --muted: #6c6274;
+  --rule: rgba(34, 26, 41, 0.12);
+  --rule-strong: rgba(34, 26, 41, 0.16);
+  --rail: rgba(34, 26, 41, 0.26);
+
+  --apricot: #a45f27;
+  --lilac: #7b4fa0;
+  --cyan: #1f7d86;
+
+  --syn-comment: #6c6274;
+  --syn-keyword: #7b4fa0;
+  --syn-function: #1f7d86;
+  --syn-string: #4a6d2f;
+  --syn-number: #a45f27;
+  --syn-class: #7a5f12;
+  --syn-property: #a1476a;
+  --syn-punct: #665d6e;
+
+  --shadow-drawer: 0 30px 70px -30px rgba(34, 26, 41, 0.35);
+}
