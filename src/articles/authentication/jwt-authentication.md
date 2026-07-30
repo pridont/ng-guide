@@ -11,85 +11,169 @@ title: "JWT Authentication"
 ტოკენებს, კერძოდ JSON Web Token-ებს (JWT). ჩვენ სწორედ ასეთ
 ტოკენებთან ვიმუშავებთ.
 
-ამ ნიმუშში ვიხელმძღვანელებთ ბიბლიოთეკით `@auth0/angular-jwt`, რომელიც JWT ტოკენებთან მუშაობას უფრო ამარტივებს.
+JWT-სთან მუშაობა ორ რამეზე დაიყვანება:
+ტოკენის ჰედერებში ჩასმა და მისი ვადის შემოწმება. ორივე ანგულარის ჩაშენებული
+ხელსაწყოებით საკმაოდ მარტივად კეთდება.
 
-```sh
-npm install @auth0/angular-jwt
+## რა არის JWT
+
+JSON Web Token არის სტრინგი, რომელიც წერტილებით სამ ნაწილად იყოფა:
+
+```
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzY0NTAwMDAwfQ.abc123456678900
+└──── header ────┘  └────────────── payload ───────────────┘└ signature ┘
 ```
 
-ჩვენი ანგულარის კონფიგურაცია შემდეგნაირად გამოიყურება. `app.config.ts`-ში პროვაიდერებში გვაქვს შემოტანილი
-`provideHttpClient` და `JwtModule` (რომელიც npm-ით დავაინსტალირეთ). `provideHttpClient`-ს უნდა მივაწოდოთ
-პარამეტრი `withInterceptorsFromDi()`, რადგან `JwtModule` ინტერსეპტორებს იყენებს ტოკენის დასამატებლად.
-ვინაიდან `JwtModule` მოდულზე დაფუძნებული ბიბლიოთეკაა, მისი დარეგისტრირება საჭიროა `importProvidersFrom` ფუნქციაში:
+პირველი ორი ნაწილი არის base64url-ით დაშიფრული JSON. ანუ **payload
+საიდუმლო არ არის** — მისი წაკითხვა ნებისმიერს შეუძლია. სწორედ ამიტომ
+ტოკენში პაროლს ან სხვა მგრძნობიარე მონაცემს არასდროს ვდებთ.
+
+მესამე ნაწილი — ხელმოწერა — სერვერის საიდუმლო გასაღებით იქმნება. სწორედ
+ის ადასტურებს, რომ ტოკენი გაყალბებული არ არის.
+
+**აქედან გამომდინარეობს მნიშვნელოვანი მნიშვნელოვანია გავიაზროთ:** კლიენტზე ტოკენის
+დეკოდირება **ვალიდაცია არ არის**. ჩვენ ხელმოწერას ვერ ვამოწმებთ (გასაღები
+სერვერზეა), ამიტომ კლიენტზე ტოკენის შემოწმება მხოლოდ მომხმარებლის
+კომფორტისთვისაა — რომ ვადაგასული ტოკენით ტყუილად არ გავგზავნინოთ მოთხოვნა
+და ჯერ, მაგალითად, ავტორიზაცია ვთხოვოთ.
+რეალურ დაცვას ყოველთვის სერვერი ახორციელებს.
+
+## ტოკენთან მუშაობის ფუნქციები
+
+შევქმნათ ფაილი `jwt.ts` ორი ფუნქციით:
 
 ```ts
-import { ApplicationConfig, importProvidersFrom } from "@angular/core";
-import {
-  provideHttpClient,
-  withInterceptorsFromDi,
-} from "@angular/common/http";
-import { JwtModule } from "@auth0/angular-jwt";
+export interface JwtPayload {
+  sub?: string;
+  exp?: number;
+  iat?: number;
+  [claim: string]: unknown;
+}
+
+/** დეკოდირებას უკეთებს JWT payload-ს. აბრუნებს null-ს თუ ტოკენი ხარვეზულია. */
+export function decodeToken(token: string): JwtPayload | null {
+  const parts = token.split(".");
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  try {
+    // JWT იყენებს base64url-ს; atob ელოდება სტანდარტულ base64-ს.
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "="
+    );
+    const json = decodeURIComponent(
+      atob(padded)
+        .split("")
+        .map((c) => "%" + c.charCodeAt(0).toString(16).padStart(2, "0"))
+        .join("")
+    );
+    return JSON.parse(json) as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
+/** არარსებული, ცუდად შედგენილი ანდ `exp`-ის არმქონე ტოკენი ვადაგასულად ითვლება. */
+export function isTokenExpired(token: string | null): boolean {
+  if (!token) {
+    return true;
+  }
+
+  const payload = decodeToken(token);
+  if (!payload?.exp) {
+    return true;
+  }
+
+  // `exp` ტოკენში არის წამებში, ხოლო Date.now() მილისეკუნდებში.
+  return payload.exp * 1000 <= Date.now();
+}
+```
+
+რამდენიმე დეტალი, რომელიც შეიძლება გამოგვრჩეს:
+
+- **base64url ≠ base64.** JWT `-` და `_` სიმბოლოებს იყენებს იქ, სადაც
+  სტანდარტულ base64-ს `+` და `/` აქვს, და ბოლოში `=` შემავსებლებს არ წერს.
+  ამიტომ `atob`-ისთვის მიწოდებამდე ტოკენს ვასწორებთ.
+- **`decodeURIComponent`-ის ხრიკი.** `atob` მხოლოდ latin1 სიმბოლოებს
+  აბრუნებს. თუ ტოკენში UTF-8 ტექსტია (მაგალითად მომხმარებლის ქართული
+  სახელი), მისი პირდაპირ წაკითხვა მონაცემს დააზიანებს.
+- **`exp` წამებშია**, `Date.now()` კი მილიწამებში — ამიტომ ის 1000-ზე მრავლდება.
+- **უსაფრთხო ნაგულისხმევი.** თუ ტოკენი არ არსებობს, იგი გაფუჭებულია ან `exp`
+  არ აქვს, ჩვენ მას **ვადაგასულად** ვთვლით. ეჭვის შემთხვევაში სჯობს
+  მომხმარებელს ხელახლა ვთხოვოთ ავთენტიფიკაცია, ვიდრე შემთხვევით შევუშვათ.
+
+## ტოკენის ავტომატური მიბმა
+
+ახლა გვჭირდება, რომ ეს ტოკენი ყოველ მოთხოვნას ავტომატურად მიებას. ამისთვის
+[ინტერსეპტორს](/http/) ვიყენებთ.
+
+`auth-interceptor.ts`:
+
+```ts
+import { HttpInterceptorFn } from "@angular/common/http";
+
+const ALLOWED_HOSTS = ["dummyjson.com"];
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem("access_token");
+  const host = new URL(req.url, document.baseURI).hostname;
+
+  if (!token || !ALLOWED_HOSTS.includes(host)) {
+    return next(req);
+  }
+
+  return next(
+    req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` },
+    })
+  );
+};
+```
+
+`ALLOWED_HOSTS` აუცილებელი ნაწილია: ტოკენი მხოლოდ **ჩვენს** ბექენდს უნდა
+გაეგზავნოს. თუ აპლიკაცია სხვა API-საც მიმართავს (მაგალითად რუკების ან
+ანალიტიკის სერვისს), ტოკენის იქ გაგზავნა მის გაჟონვას ნიშნავს.
+
+ყურადღება მიაქციეთ, რომ შედარებას **hostname-ზე** ვაკეთებთ და არა
+`req.url.includes("dummyjson.com")`-ით. სხვა შემთხვევაში მისამართი
+`https://evil.com/?x=dummyjson.com` შემოწმებას გაივლიდა და ტოკენს
+თავდამსხმელს გავუგზავნიდით.
+
+ინტერსეპტორს ვარეგისტრირებთ `app.config.ts`-ში:
+
+```ts
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from "@angular/core";
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { authInterceptor } from "./auth-interceptor";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(withInterceptorsFromDi()),
-    importProvidersFrom(
-      JwtModule.forRoot({
-        config: {
-          tokenGetter: () => localStorage.getItem("access_token"),
-          allowedDomains: ["dummyjson.com"],
-        },
-      })
-    ),
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([authInterceptor])),
   ],
 };
 ```
 
-ამ მოდულს `forRoot` ში უნდა მივაწოდოთ კონფიგურაცია. ერთი მხრივ, ტოკენის
-გეთერი ფუნქცია - ჩვენ მას შევინახავთ და ავიღებთ ლოკალური მეხსიერებიდან, ამიტომ ანონიმურ
-ფუნქციაში დავაბრუნოთ `localStorage.getItem` და ჩვენი ტოკენის key.
-`allowdDomains` არასავალდებულო კონფიგურაციაა, სადაც შეგვიძლია განვსაზღვროთ,
-მოდულმა რომელ დომეინებზე უნდა იმუშაოს. შესაძლოა გვაქვს რომელიმე დომეინი,
-სადაც ტოკენის მიწოდება არ გვჭირდება. ჩვენ აქ უბრალოდ ჩვენი ბექენდის დომეინს
-ჩავწერთ.
-
-კონკრეტულად რას აკეთებს ეს ბიბლიოთეკა? მარტივად რომ ვთქვათ, ის მეხსიერებიდან
-იღებს ჩვენ ტოკენს და მას Http ჰედერებს ავტომატურად აბამს, რომ ჩვენ ამის
-გაკეთება არ მოგვიწიოს ყოველ მოთხოვნაზე. ამას ეს ბიბლიოთეკა `HttpInterceptor`-ის
-საშუალებით აკეთებს.
-
-ჩვებულებრივ ამას ასე გავაკეთებდით:
+ამის გარეშე ყოველ მოთხოვნაზე ჰედერს ხელით მივაწერდით:
 
 ```ts
-import { inject, Injectable } from "@angular/core";
-import { ShoppingCart } from "../types/cart.model";
-import { AuthService } from "./auth.service";
-
-@Injectable({ providedIn: "root" })
-export class CartService {
-  private http = inject(HttpClient);
-  private authService = inject(AuthService);
-
-  getCartsForUser() {
-    return this.http.get<{ carts: ShoppingCart[] }>(
-      `https://dummyjson.com/auth/carts/user/`,
-      {
-        headers: {
-          Authentication: `Bearer ${authService.getToken()}`,
-        },
-      }
-    );
-  }
+getCartsForUser() {
+  return this.http.get<{ carts: ShoppingCart[] }>(
+    "https://dummyjson.com/auth/carts/user/",
+    {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    }
+  );
 }
 ```
 
-ეს უბრალოდ ნიმუშია და არ წარმოადგენს ჩვენი აპლიკაციის ნაწილს.
-ჩვეულებრივ ვაგზავნით მოთხოვნას რაღაც ენდფოინთზე, და დამატებით ვაწვდით
-მეორე არგუმენტად კონფიგურაციის ობიექტს, სადაც ჰედერებს ვაყენებთ,
-კერძოდ `Authentication` ჰედერს, რომელიც არის `Bearer` და ამას
-მოყვება მეხსიერებაში შენახული ტოკენი, რომელიც შეიძლება ავტენტიფიკაციის
-სერვისით ავიღოთ. `JwtModule`-ის დახმარებით ამის გაკეთება არ გვჭირდება.
-მეტიც, ამ ბიბლიოთეკით ტოკენის დეკოდირება და მისი ვადის შემოწმებაც შეგვიძლია.
+ეს არა მხოლოდ მოსაბეზრებელია, არამედ საშიშიც: საკმარისია ერთგან დაგვავიწყდეს
+და მოთხოვნა ჩავარდება. ინტერსეპტორთან ეს პრობლემა აღარ არსებობს.
 
 შევხედოთ ჩვენი როუთინგის კონფიგურაციას `app.routes.ts`-ში:
 
@@ -173,11 +257,11 @@ export interface ShoppingCart {
 ცალკე სერვისების ფოლდერში მოვათავსებთ სერვისებს. ჯერ მივხედოთ ავთენტიფიკაციის
 ლოგიკას.
 
-`types/services/auth.service.ts`
+`types/services/auth-service.ts`
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import {
   ActivatedRouteSnapshot,
   CanActivateFn,
@@ -197,7 +281,7 @@ interface LoginResponse {
   token: string;
 }
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
@@ -273,7 +357,7 @@ post მოთხოვნით. აქ მესამე არგუმე�
 ```ts
 import { Component, inject } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
-import { AuthService } from "../services/auth.service";
+import { AuthService } from "../services/auth-service";
 
 @Component({
   selector: "app-auth",
@@ -333,7 +417,7 @@ export class Auth {
 
 ```ts
 import { Component, inject, OnInit } from "@angular/core";
-import { AuthService } from "../services/auth.service";
+import { AuthService } from "../services/auth-service";
 
 @Component({
   selector: "app-logout",
@@ -359,11 +443,11 @@ export class Logout implements OnInit {
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { ShoppingCart } from "../types/cart.model";
-import { AuthService } from "./auth.service";
+import { AuthService } from "./auth-service";
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class CartService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
@@ -379,8 +463,8 @@ export class CartService {
 აქ ჩვენ ასევე ვაინჯექთებთ `AuthService`-ს და მისი საშუალებით მოხმარებლის
 აიდის ვიღებთ, რომელსაც ენდფოინთის ბოლოში ვამატებთ. `/auth` მისამართზე
 არსებული მონაცემები ხელმისაწვდომია მხოლოდ ტოკენის საშუალებით. ამ ტოკენს
-`JwtModule` ჩვენ მაგივრად მისცემს ამ მოთხოვნას. ამ მოდულმა უკვე იცის,
-საიდან უნდა აიღოს ტოკენი. საბოლოოდ `getCartsForUser`
+ჩვენი `authInterceptor` ჩვენ მაგივრად მიაბამს ამ მოთხოვნას — ამ სერვისში
+ტოკენის შესახებ არაფერი წერია და არც უნდა ეწეროს. საბოლოოდ `getCartsForUser`
 მეთოდი მოგვცემს `Obsevable`-ს რომელიც დააბრუნებს ობიექტს. ამ ობექტის ერთ-ერთი
 თვისებაა `cart` სადაც ჩვენთვის საჭირო მონაცემებია.
 
@@ -388,7 +472,7 @@ export class CartService {
 
 ```ts
 import { Component, inject, OnInit } from "@angular/core";
-import { CartService } from "../services/cart.service";
+import { CartService } from "../services/cart-service";
 import { ShoppingCart } from "../types/cart.model";
 
 @Component({
@@ -437,8 +521,9 @@ export class ShoppingCart implements OnInit {
 
 ### შეჯამება
 
-ჩვენ ამ თავში ანგულარში ვისწავლეთ ავთენტიფიკაცია JWT-ის საშუალებით. ჩვენ გამოვიეყნეთ
-`@auth0/angular-jwt` რომელიც ჩვენ მაგივრად ამატებს ტოკენს მოთხოვნების ჰედერებში.
+ჩვენ ამ თავში ანგულარში ვისწავლეთ ავთენტიფიკაცია JWT-ის საშუალებით. ჩვენ დავწერეთ `authInterceptor`, რომელიც ავტომატურად
+ამატებს ტოკენს მოთხოვნების ჰედერებში, და `jwt.ts`, სადაც ტოკენის დეკოდირებისა
+და ვადის შემოწმების ლოგიკაა.
 ჩვენ შევქმენით ავთენტიფიკაციის სერვისი, სადაც ვმართავთ ანგარიშში შესვლას, ანუ
 ტოკენისა და მომხმარებლის მონაცემების მიღებასადა შენახვას, და ანგარიშიდან გასვლას,
 ანუ მოხმარებლის მონაცემებისა და ტოკენის მეხსიერებიდან წაშლას. ხშირად ამ დროს

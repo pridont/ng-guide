@@ -7,88 +7,98 @@ title: "სთეითში მონაცემების დამატ�
 მონაცემების დასამატებლად დაგვჭირდება სერვისში სათანადო ლოგიკის შემოტანა:
 
 ```ts
-  public addItem(title: string) {
-    const itemToAdd = {
-      title: title,
-      done: false,
-    };
+  addItem(title: string) {
+    const itemToAdd = { title, done: false };
 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
+    this.http.post<TodoItem>(this.url, itemToAdd).subscribe((newItem) => {
+      this._todos.update((todos) => [...todos, newItem]);
     });
-
-    this.http
-      .post<{ id: number }>(this.url, itemToAdd, {
-        headers,
-      })
-      .pipe(
-        tap((response) => {
-          const newItem = {
-            id: response.id,
-            ...itemToAdd,
-          };
-          this.todos$.next([...this.todos$.value, newItem]);
-        })
-      )
-      .subscribe();
   }
 ```
 
 ჩვენ პარამეტრში მივიღებთ ახალი ნივთის აღწერას. მისგან ვქმნით ობიექტს,
 რომელსაც ექნება სათაური და done, რომელიც თავიდან მცდარი უნდა იყოს.
-`id` თვისებას `json-server` თავისით მიანიჭებს უნიკალური მნიშვნელობით.
+`id` თვისებას `json-server` თავისით მიანიჭებს უნიკალური მნიშვნელობით
+და პასუხში სრულ ობიექტს დაგვიბრუნებს.
 
-აქვე ვქმნით `HttpHeaders`-ის ინსტანციას, სადაც საჭიროა რომ მივუთითოთ
-`Content-Type` როგორც `application/json` რათა მოთხხოვნამ მონაცემები
-მიიღოს (ეს `json-server`-ის სპეციფიკური საჭიროებაა). მოღხოვნას ვაგზავნით
-და ვაწვდით ახალ ნივთს (რომელიც სტრინგად ავტომატურად დაკონვერტირდება).
-მესამე არგუმენტად ვაწოდებთ ობიექტში (შემოკლებულად) headers თვისებაში ჩვენი
-`HttpHeaders`-ის ინსტანციას.
+`Content-Type` ჰედერის ხელით მითითება არ გვჭირდება — `HttpClient` ობიექტს
+ავტომატურად გარდაქმნის JSON-ად და სათანადო ჰედერს თვითონ დააყენებს.
 
-საპასუხოდ სერვერი გვიბრუნებს ობიექტს, სადაც გვაქვს რიცხვის ტიპის აიდი.
-ამის საფუძველზე შეგვიძლია დავწეროთ ეფექტი `tap` ოპერატორში, სადაც
-ამ აიდის ავიღებთ, ჩავსვამთ ობიექტში, რომელსაც ასევე ექნება ის დანარჩენი
-თვისებები, რაც თავიდან შექმნილ ახალ ნივთს მივეცით და დავანექსთებთ
-ახალ მასივს, სადაც ჩავყრით სპრედ ოპერატორით `todos$` სტრიმის უკანასკნელ
-მნიშვნელობას, პლიუს ახლად შექმნილ ნივთს. ასე სტრიმში ვანექსთებთ ძველ
-მასივს მასში დამატებული ახალი ნივთით.
+## `set` თუ `update`?
 
-კომპონენტის კლასში შემოვიტანოთ თვისება `newItemTitle` სადაც შეყვანილ ტექსტს
+ინიციალიზაციისას `set`-ს ვიყენებდით, აქ კი `update`-ს. განსხვავება ასეთია:
+
+- `set(value)` — მნიშვნელობას **მთლიანად ცვლის**. მაშინ ვიყენებთ, როცა
+  ახალი მნიშვნელობა წინაზე არ არის დამოკიდებული (სერვერიდან სრული სია მოვიდა).
+- `update(fn)` — ქოლბექში **წინა მნიშვნელობას** ვიღებთ და ახალს ვაბრუნებთ.
+  მაშინ ვიყენებთ, როცა არსებულს რაღაცას ვამატებთ ან ვაკლებთ.
+
+ჩვენ შემთხვევაში ახალი სია არის "ძველი სია + ახალი ნივთი", ამიტომ
+`update` სწორი არჩევანია.
+
+## ახალი მასივი, და არა `push`
+
+ყურადღება მიაქციეთ, რომ ჩვენ **ახალ მასივს ვქმნით** სპრედ ოპერატორით:
+
+```ts
+this._todos.update((todos) => [...todos, newItem]);
+```
+
+და არა ასე:
+
+```ts
+// ❌ არ იმუშავებს
+this._todos.update((todos) => {
+  todos.push(newItem);
+  return todos;
+});
+```
+
+მიზეზი ისაა, რომ სიგნალი მნიშვნელობებს ნაგულისხმევად `Object.is`-ით ადარებს.
+თუ იმავე მასივს დავაბრუნებთ, სიგნალისთვის რეფერენსი არ შეცვლილა, ესეიგი
+ცვლილებაც არ მომხდარა — და თემფლეითი არ განახლდება. ეს ერთ-ერთი ყველაზე
+ხშირი შეცდომაა სიგნალებთან მუშაობისას.
+
+**წესი:** სიგნალში მოთავსებულ ობიექტს ან მასივს არასდროს ვცვლით ადგილზე —
+ყოველთვის ახალს ვქმნით.
+
+## კომპონენტში
+
+კომპონენტის კლასში შემოვიტანოთ სიგნალი `newItemTitle` სადაც შეყვანილ ტექსტს
 შევინახავთ და `addItem` მეთოდი, რომლითაც დავუძახებთ სერვისზე დამატების მეთოდს
 და მას შეყვანილ ტექსტს გავატანთ. ამის შემდეგ ტექსტს ვაცარიელებთ.
 
 ```ts
-import { ChangeDetectionStrategy, Component, inject, OnInit } from "@angular/core";
+import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { TodoItem, TodoService } from "./todo.service";
+import { TodoService } from "./todo-service";
 
 @Component({
   selector: "app-root",
   imports: [FormsModule],
   templateUrl: "./app.html",
   styleUrl: "./app.css",
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit {
-  private todoService = inject(TodoService);
+  protected todoService = inject(TodoService);
 
-  newItemTitle = "";
+  protected newItemTitle = signal("");
 
-  todos$ = this.todoService.todos;
+  protected isEmpty = computed(() => this.todoService.todos().length === 0);
 
   ngOnInit(): void {
     this.todoService.init();
   }
 
   addItem() {
-    this.todoService.addItem(this.newItemTitle);
-    this.newItemTitle = "";
+    this.todoService.addItem(this.newItemTitle());
+    this.newItemTitle.set("");
   }
 }
 ```
 
 თემფლეითში `ul` ელემენტამდე ჩავსვათ კონტეინერი, სადაც მოვათავსებთ `input`-სა
-და ღილაკს. `input` დავაკავშიროთ კლასის თვისებასთან `NgModel`-ით, ხოლო ღილაკზე
+და ღილაკს. `input` დავაკავშიროთ სიგნალთან `NgModel`-ით, ხოლო ღილაკზე
 დაკლიკების მოვლენა მივაბათ `addItem` მეთოდს. ღილაკი გაუქმებული იქნება, თუ
 `newItemTitle` ცარიელი სტრინგია.
 
@@ -102,7 +112,7 @@ export class App implements OnInit {
   />
   <button
     class="btn btn-primary col-12"
-    [disabled]="!newItemTitle"
+    [disabled]="!newItemTitle()"
     (click)="addItem()"
   >
     <span>Add</span>
@@ -110,8 +120,13 @@ export class App implements OnInit {
 </div>
 ```
 
+`[(ngModel)]` პირდაპირ სიგნალთან მუშაობს: ბაინდინგში ფრჩხილებს **არ** ვწერთ
+(`[(ngModel)]="newItemTitle"`), რადგან two-way ბაინდინგს თვითონ სიგნალი
+სჭირდება და არა მისი მნიშვნელობა. სამაგიეროდ, სადაც მნიშვნელობა გვჭირდება —
+`[disabled]`-ში — ფრჩხილები აუცილებელია: `!newItemTitle()`.
+
 ტექსტის შეყვანა და ღილაკზე დაკლიკება სერვისზე მეთოდს გააქტიურებს რაც HTTP
-მოთხოვნას განახორციელებს და სტრიმს განაახლებს ახალი დამატებული ნივთით.
-ვინაიდან სტრიმზე უკვე თემფლეითში ვასუბსქრაიბებთ, შედეგი გამოჩნდება.
+მოთხოვნას განახორციელებს და სთეითს განაახლებს ახალი დამატებული ნივთით.
+ვინაიდან თემფლეითი ამ სიგნალს კითხულობს, შედეგი მაშინვე გამოჩნდება.
 
 ახლა [სთეითში მოლოდინის რეჟიმისა და ერორების ასახვაზე](./loading-state-and-error.html) გადავინაცვლოთ.

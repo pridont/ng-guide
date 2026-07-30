@@ -44,6 +44,13 @@
 ### ბექ-ენდთან მუშაობა
 
 - [HTTP მოთხოვნებთან მუშაობა](/http/index.html)
+- [State Management სიგნალებით](/state-management/index.html)
+  - [პროექტის მომზადება](/state-management/initial-setup.html)
+  - [სთეითში მონაცემების ინიციალიზაცია](/state-management/initializing-state.html)
+  - [სთეითში მონაცემების დამატება](/state-management/adding-data-to-state.html)
+  - [სთეითში მოლოდინის რეჟიმისა და ერორის ასახვა](/state-management/loading-state-and-error.html)
+  - [წაშლა და მონიშვნა](/state-management/update-and-delete.html)
+  - [შეჯამება](/state-management/summary.html)
 - [Authentication - ავტორიზაცია](/authentication/index.html)
   - [JWT Authentication](/authentication/jwt-authentication.html)
   - [CanActivate](/authentication/can-activate.html)
@@ -56,13 +63,6 @@
     - [Creation Operators](/rxjs/operators/creation-operators.html)
     - [Pipeable Operators](/rxjs/operators/pipeable-operators.html)
   - [Subjects](/rxjs/subjects.html)
-- [State Management RxJS-ით](/state-management/index.html)
-  - [პროექტის მომზადება](/state-management/initial-setup.html)
-  - [სთეითში მონაცემების ინიციალიზაცია](/state-management/initializing-state.html)
-  - [სთეითში მონაცემების დამატება](/state-management/adding-data-to-state.html)
-  - [სთეითში მოლოდინის რეჟიმისა და ერორის ასახვა](/state-management/loading-state-and-error.html)
-  - [წაშლა და მონიშვნა](/state-management/update-and-delete.html)
-  - [შეჯამება](/state-management/summary.html)
 
 ### Advanced
 
@@ -75,7 +75,7 @@
 ### ბონუსები
 
 - [სიგნალები](/signals/index.html)
-- [HostListener](/at-host/index.html)
+- [Host ელემენტი](/at-host/index.html)
 - [TypeScript-ის მოკლე შესავალი](/typescript/index.html)
   - [ინსტალაცია და გამოყენება](/typescript/tsc.html)
   - [ძირითადი ტიპები](/typescript/types.html)

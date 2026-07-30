@@ -4,15 +4,14 @@ title: "სთეითში მონაცემების ინიცი�
 
 # სთეითში მონაცემების ინიციალიზაცია
 
-ჯერ შევქმნათ სერვისი `todo.service.ts`, რომელიც გასაკეთებელი საქმეების სიის მენეჯმენტზე
+ჯერ შევქმნათ სერვისი `todo-service.ts`, რომელიც გასაკეთებელი საქმეების სიის მენეჯმენტზე
 იზრუნებს, ისევე როგორც ბექენდიდან ამ სიის მიღება-მოდიფიკაციაზე. მივხედოთ სთეითის
 ინიციალიზაციის ლოგიკას. ანუ ჩვენ გვინდა, რომ როცა აპლიკაცია გაიხსნება, ჩაიტვირთოს
 გასაკეთებელი საქმეები.
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
-import { BehaviorSubject, catchError, of, tap } from "rxjs";
+import { inject, Service, signal } from "@angular/core";
 
 export interface TodoItem {
   id: number;
@@ -20,27 +19,21 @@ export interface TodoItem {
   done: boolean;
 }
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class TodoService {
   private url = "http://localhost:3000/todos";
-
-  private todos$ = new BehaviorSubject<TodoItem[]>([]);
-
   private http = inject(HttpClient);
 
-  get todos() {
-    return this.todos$.asObservable();
-  }
+  // შიდა, მოდიფიცირებადი სთეითი
+  private readonly _todos = signal<TodoItem[]>([]);
 
-  public init() {
-    this.http
-      .get<TodoItem[]>(this.url)
-      .pipe(
-        tap((todos) => {
-          this.todos$.next(todos);
-        })
-      )
-      .subscribe();
+  // გარეთ გამოტანილი, მხოლოდ წასაკითხი
+  readonly todos = this._todos.asReadonly();
+
+  init() {
+    this.http.get<TodoItem[]>(this.url).subscribe((todos) => {
+      this._todos.set(todos);
+    });
   }
 }
 ```
@@ -50,45 +43,62 @@ export class TodoService {
 
 სერვისში ვინახავთ მისამართს, რომელიც ენდფოინთის მიხედვით აცნობებს
 `json-server`-ს JSON ფაილში რომელი თვისებიდან ამოიღოს ინფორმაცია.
-ვქმნით `todo$`-ს რომელიც იქნება `BehaviorSubject`, ის დააბრუნებს
-`TodoItem` მასივის ტიპის მონაცემებს და ის თავიდან იქნება ცარიელი მასივი.
+კლასში შემოგვაქვს `HttpClient` რომლითაც მოთხოვნებს განვახორციელებთ.
 
-კონსტრუქტორში შემოგვაქვს `HttpClient` რომლითაც მოთხოვნებს განვახორციელებთ.
+## ორი თვისება ერთი სთეითისთვის
 
-აქვე ვმქნით გეთერს, რომელიც ამ ჩვენ `todo$` სტრიმს დააბრუნებს `asObservable`
-მეთოდით, ეს საბჯექთის მაგივრად აბრუნებს Observable ინსტანციას, რათა მასზე
-კომპონენტებიდან `next` მეთოდის დაძახება არ იყოს შესაძლებელი. ჩვენ გვინდა,
-რომ `next` მეთოდის დაძახება შეიძლებოდეს მხოლოდ სერვისიდან, ამით გაუგებრობებს
-ავირიდებთ თავიდან რადგან სხვადასხვა კომპონენტებიდან მისი დაძახება რაღაც ეტაპზე
-ქაოსს გამოიწვევს.
-
-ჩვენ ვქმნით `init` მეთოდს, რომელსაც შეგვიძლია კომპონენტიდან დავუძახოტ.
-ის HTTP მოთხოვნით მიიღებს მონაცემებს და მას `tap` ოპერატორით `todos$`
-სტრიმში დაანექსთებს. ასე GET მოთხოვნას მოყვება ეფექტი, რომელიც სთეითის
-სტრიმში ახალ მნიშვნელობას გასცემს. მასზე აქვე ვასუბსქრაიბებთ, რადგან
-კომპონენტში მონაცემებს მაინც `todos$` სტრიმიდან ავიღებთ. ჩვენთვის მთავარია,
-რომ ამ მეთოდზე დაძახებამ უბრალოდ მოთხოვნა გაგზავნოს და `tap`-ში არსებული
-ეფექტი გამოიწვიოს. ანსუბსქრაიბი აქ არ დაგვჭირდება, რადგან ამას `HttpClient`
-აგვარებს.
-
-ახლა App-ში გამოვიყენოთ ეს სერვისი:
+ყურადღება მიაქციეთ ამ ორ ხაზს:
 
 ```ts
-import { ChangeDetectionStrategy, Component, inject, OnInit } from "@angular/core";
+private readonly _todos = signal<TodoItem[]>([]);
+readonly todos = this._todos.asReadonly();
+```
+
+ეს ერთი და იმავე სთეითის ორი "სახეა":
+
+- `_todos` არის `WritableSignal` — მასზე `set` და `update` მეთოდები არსებობს.
+  ის `private`-ია, ანუ მისი შეცვლა მხოლოდ ამ სერვისიდან შეიძლება.
+  ხაზგასმისთვის სახელს ქვედა ტირეს ვუწერთ.
+- `todos` არის იმავე სიგნალის მხოლოდ წასაკითხი ვერსია, რომელსაც
+  [`asReadonly()`](/signals/) გვაძლევს. სწორედ მას იყენებენ კომპონენტები.
+
+რატომ ვაკეთებთ ამას? იმისთვის, რომ სთეითის შეცვლა **ერთ ადგილას** მოხდეს.
+თუ `_todos`-ს პირდაპირ გავიტანდით, ნებისმიერ კომპონენტს შეეძლებოდა მასზე
+`set`-ის დაძახება, და რაღაც ეტაპზე ვეღარ გავიგებდით, სთეითი სად და რატომ
+შეიცვალა. ახლა კი პასუხი ყოველთვის ერთია: სერვისის რომელიღაც მეთოდში.
+
+`readonly` (ტაიპსკრიპტის კეივორდი) აქვე იმას უზრუნველყოფს, რომ თვითონ
+თვისებას სხვა სიგნალით არ ჩავანაცვლოთ.
+
+## init მეთოდი
+
+ჩვენ ვქმნით `init` მეთოდს, რომელსაც შეგვიძლია კომპონენტიდან დავუძახოთ.
+ის HTTP მოთხოვნით მიიღებს მონაცემებს და მათ `_todos` სიგნალში ჩასვამს
+`set` მეთოდით. მოთხოვნაზე ვასუბსქრაიბებთ, რადგან სხვა შემთხვევაში ის
+საერთოდ არ გაიგზავნება. `unsubscribe` აქ არ დაგვჭირდება, რადგან ამას
+`HttpClient` აგვარებს.
+
+აქ ერთი მნიშვნელოვანი დეტალია: `subscribe`-ის ქოლბექს **სთეითის განახლების
+გარდა სხვა არაფერი აქვს გასაკეთებელი**. ვინ დაინახავს ამ ცვლილებას და როგორ
+დარენდერდება — ეს უკვე სიგნალის საზრუნავია.
+
+## კომპონენტში გამოყენება
+
+ახლა `App`-ში გამოვიყენოთ ეს სერვისი:
+
+```ts
+import { Component, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { TodoItem, TodoService } from "./todo.service";
+import { TodoService } from "./todo-service";
 
 @Component({
   selector: "app-root",
   imports: [FormsModule],
   templateUrl: "./app.html",
   styleUrl: "./app.css",
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit {
-  private todoService = inject(TodoService);
-
-  todos$ = this.todoService.todos;
+  protected todoService = inject(TodoService);
 
   ngOnInit(): void {
     this.todoService.init();
@@ -96,52 +106,70 @@ export class App implements OnInit {
 }
 ```
 
-აქ ჩვენ `@Component` დეკორატორში საინტერესო რაღაცას ვამატებთ:
-`changeDetection`-ის სტრატეგიას ვცვლით `onPush`-ზე (რომელიც უნდა დავაიმპორტოთ).
-ეს ეუბნება ანგულარის აპლიკაციას, რომ ავტომატურად არ დააფიქსიროს ცვლილებები და
-არ დაარენდეროს თემფლეითი. ამის გამოყენება უაცილებელი არ არის, მაგრამ რეაქტიული
-მიდგომის დროს ეს რესურსებს ზოგავს, რადგან ჩვენ შეგვიძლია ცვლილებების დეტექტორი
-მაშინ დავატრიგეროთ, როცა ამის საჭიროება ნამდვილად არსებობს. ეს მეთოდი სირთულეებს
-შექმნის, თუ ჩვენ სტრიმებს და `async` ფაიფებს არ ვიყენებთ, თუმცა მათი გამოყენების
-შემთხვევაში აპლიკაცია შედარებით უფრო სწრაფია და ნაკლებ რესურსებს საჭიროებს.
-ანგულარში რეაქტიული პროგრამირების დროს ფაქტობრივად ყველა კომპონენტი `onPush`-ზე გვაქვს.
+სულ ეს არის. კომპონენტი სთეითს **არ იმეორებს** — ის სერვისს პირდაპირ
+თემფლეითში კითხულობს. `protected` იმიტომ, რომ თემფლეითიდან წვდომა
+გვჭირდება, მაგრამ კლასის გარედან — არა.
 
-ჩვენ ვაინჯექთებთ `TodoService`-ს და კომპონენტის თვისებაში ვინახავთ ნივთების
-სტრიმს, რომელსაც გეთერი გვიბრუნებს.
-
-აპლიკაციის ინიციალიზაციისას სერვისზე ვეძახით `init` მეთოდს, რომელის შედეგადაც
-ჩვენ კომპონენტის `todos$` სტრიმში მონაცემები უნდა მივიღოთ, რა თქმა უნდა ეს იმ
-შემთხვევაში, თუ ამ სტრიმზე დავასუბსქრაიბებთ. კონვენციურად ყოველთვის უნდა ვცადოთ
-თემფლეითში `async` ფაიფით დასუბსქრაიბება იმის მაგივრად, რომ მსაზე კლასში
-დავასუბსქრაიბოთ.
+აპლიკაციის ინიციალიზაციისას სერვისზე ვეძახით `init` მეთოდს.
 
 ```html
 <div class="container" style="max-width: 500px">
   <h1>Your List:</h1>
-  @if (todos$ | async; as todos) {
-    <ul class="list-group">
-      @if (todos.length === 0) {
-        <p>Your list will show here...</p>
-      }
-      @for (item of todos; track item.id) {
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <input type="checkbox" [checked]="item.done" />
-            <span class="ms-2">{{ item.title }}</span>
-          </div>
-        </li>
-      }
-    </ul>
-  }
+  <ul class="list-group">
+    @if (todoService.todos().length === 0) {
+      <p>Your list will show here...</p>
+    }
+    @for (item of todoService.todos(); track item.id) {
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <input type="checkbox" [checked]="item.done" />
+          <span class="ms-2">{{ item.title }}</span>
+        </div>
+      </li>
+    }
+  </ul>
 </div>
 ```
 
-ჩვენ გამოვსახავთ სიას `ngIf` დირექტივით, სადაც `async` ფაიფით სტრიმზე ვასუბსქრაიბებთ
-და მისი შედეგი გამოგვაქვს, როგორც `todo` ცვლადი. შემდეგ ამ ცვლადზე ვაკეთებთ
-ლუპს და მათ გამოვსახავთ. ჩვენ ვქმნით ჩექბოქსს ყოველი ნივთისთვის, რომელიც მინიშნული
-იქნება, თუ მისი `done` თვისება ჭეშმარიტია. თუ მასივი ცარიელია, ჩვენ ტექსტით ამაზე
-მივანიშნებთ. `async` ფაიფის ერთ-ერთი პლიუსი ის არის, რომ ის view-ს ხელახლა
-დარენდერებას მაშინ აიძულებს, როცა მასში გატარებული სტრიმი ახალ მნიშვნელობას გასცემს.
+ჩვენ `@for` ბლოკით ვლუპავთ სიგნალის მნიშვნელობაზე — გაითვალისწინეთ
+ფრჩხილები: `todoService.todos()`. ჩვენ ვქმნით ჩექბოქსს ყოველი ნივთისთვის,
+რომელიც მონიშნული იქნება, თუ მისი `done` თვისება ჭეშმარიტია. თუ მასივი
+ცარიელია, ჩვენ ტექსტით ამაზე მივანიშნებთ.
+
+არც `async` ფაიფი გვჭირდება, არც `subscribe` თემფლეითში, არც `unsubscribe`.
+როცა `_todos` შეიცვლება, ანგულარი **ზუსტად იმ ადგილს** გადაარენდერებს,
+სადაც ეს სიგნალი იკითხება.
+
+## ოდნავ უფრო სუფთად: `computed`
+
+`todoService.todos()` თემფლეითში ორჯერ იკითხება. ეს არაფრით არ არის ცუდი
+(სიგნალის წაკითხვა იაფია), მაგრამ თუ პირობა უფრო რთული გახდება, ჯობია მას
+სახელი დავარქვათ:
+
+```ts
+export class App implements OnInit {
+  protected todoService = inject(TodoService);
+
+  protected isEmpty = computed(() => this.todoService.todos().length === 0);
+
+  ngOnInit(): void {
+    this.todoService.init();
+  }
+}
+```
+
+```html
+@if (isEmpty()) {
+  <p>Your list will show here...</p>
+}
+```
+
+`computed` ავტომატურად გადაითვლება, როცა `todos` შეიცვლება.
+
+**შენიშვნა `OnPush`-ზე:** თუ ძველ მასალას ნახავთ, იქ ასეთ კომპონენტებზე
+`changeDetection: ChangeDetectionStrategy.OnPush` ეწერება. ანგულარის
+22-ე ვერსიიდან `OnPush` **ნაგულისხმევი სტრატეგიაა**, ამიტომ მისი ხელით
+ჩაწერა აღარ არის საჭირო.
 
 თუ ბრაუზერს შევხედავთ, ნივთების სია უნდა გამოისახოს.
 ახლა [ახალი ნივთების დამატებას მივხედოთ](./adding-data-to-state.html).

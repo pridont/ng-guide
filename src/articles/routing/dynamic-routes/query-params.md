@@ -18,12 +18,10 @@ title: "QueryParams"
 სურათი და ფასი. აქვე არსებობს მეთოდი ამ პროდუქტების მისაღებად.
 
 ```ts
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { Product } from "./product.model";
 
-@Injectable({
-  providedIn: "root",
-})
+@Service()
 export class ProductsService {
   private products: Product[] = [
     {
@@ -79,7 +77,7 @@ export interface Product {
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { ProductsService } from "../products.service";
+import { ProductsService } from "../products-service";
 import { RouterLink } from "@angular/router";
 import { Product } from "../product.model";
 
@@ -181,7 +179,7 @@ import { FormsModule } from "@angular/forms";
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { ProductsService } from "../products.service";
+import { ProductsService } from "../products-service";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Product } from "../product.model";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";

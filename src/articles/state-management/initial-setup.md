@@ -4,15 +4,10 @@ title: "პროექტის მომზადება"
 
 # პროექტის მომზადება
 
-ამ პრიექტის დასრულებული ვერსია შეგიძლიათ
-[ნახოთ აქ](https://github.com/CondensedMilk7/basic-rxjs-state-management/tree/ng17),
-თუმცა რეკომენდირებულია, რომ ჯერ გაკვეთილს მიყვეთ და დასრულებულ კოდს მხოლოდ
-იმ შემთხვევაში ჩახედოთ, თუკი გაიჭედებით.
-
 გავცეთ ბრძანება ახალი პროექტის შესაქმნელად:
 
 ```sh
-ng new todo-rxjs
+ng new todo-signals
 ```
 
 აპლიკაციაში არ გამოვიყენებთ რაუთინგს.
@@ -23,7 +18,7 @@ ng new todo-rxjs
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Todo Rxjs</title>
+    <title>Todo Signals</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
@@ -45,16 +40,9 @@ ng new todo-rxjs
 </html>
 ```
 
-`app.config.ts`-ში შემოვიტანოთ `provideHttpClient`:
-
-```ts
-import { ApplicationConfig } from "@angular/core";
-import { provideHttpClient } from "@angular/common/http";
-
-export const appConfig: ApplicationConfig = {
-  providers: [provideHttpClient()],
-};
-```
+`HttpClient`-ის დასაინჯექთებლად არაფრის დარეგისტრირება არ გვჭირდება —
+ანგულარის 21-ე ვერსიიდან ის ნაგულისხმევად ხელმისაწვდომია. `app.config.ts`
+უცვლელი რჩება.
 
 `App`-ის იმპორტებში შემოვიტანოთ `FormsModule`:
 

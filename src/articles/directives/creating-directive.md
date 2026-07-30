@@ -14,9 +14,8 @@ CLI-ს საშუალებით. ჩვენ შევქმნით �
 ng generate directive highlight
 ```
 
-ჩვენ დირექტივს ერქმევა `highlight`. ანგულარი შექმნის ახალ ფაილს, რომელიც შეიცავს წერტილებით გამოყოფილ
-`directive` სიტყვას. დირექტივ ფაილებს კონვენციურად ასეთი დასახელებით გამოყოფენ. ფაილში დაექსპორტებულია კლასი
-რომელსაც კონვენციურად ჰქვია დირექტივის სახელი + `Directive`.
+ჩვენ დირექტივს ერქმევა `highlight`. ანგულარი შექმნის ფაილს `highlight.ts`, სადაც
+დაექსპორტებულია კლასი `Highlight` — ფაილის სახელი კლასის სახელს იმეორებს.
 
 ```ts
 import { Directive } from "@angular/core";
@@ -24,12 +23,15 @@ import { Directive } from "@angular/core";
 @Directive({
   selector: "[appHighlight]",
 })
-export class HighlightDirective {
-  constructor() {}
-}
+export class Highlight {}
 ```
 
-ეს კლასი შესაბამისი მოდულის დეკლარაციების სიაშიუნდა იყოს დამატებული, რათა ანგულარმა მისი არსებობის შესახებ იცოდეს.
+**შენიშვნა:** ძველ პროექტებში დირექტივის ფაილს `highlight.directive.ts` ერქმეოდა,
+კლასს კი `HighlightDirective`. მე-20 ვერსიიდან სუფიქსი აღარ იწერება.
+გაითვალისწინეთ, რომ ეს წესი ფაიფებზე *არ* ვრცელდება — `ng generate pipe`
+დღესაც `my-filter-pipe.ts` / `MyFilterPipe`-ს ქმნის, უბრალოდ წერტილის
+ნაცვლად დეფისით.
+
 `Directive` დეკორატორში ჩვენ შეგვიძლია დირექტივის კონფიგურაცია. არსებობს სხვადასხვაგვარი სელექტორი და იმის
 მიხედვით თუ რა სელექტორს ავირჩევთ, ანგულარი განსხვავებული პრინციპით გაუკეთებს ამ დირექტივს ინიციალიზაციას.
 ოთკუთხედ ბრჭყალებში მოქცეული სახელი გულისხმობს, რომ ჩვენ დირექტივის გამოყენება ატრიბუტის სახელით შეგვიძლია
@@ -46,22 +48,24 @@ export class HighlightDirective {
 ჩვენი დირექტივის კლასში შემდეგი მოდიფიკაციები შეგვაქვს:
 
 ```ts
-import { Directive, ElementRef, HostListener, inject, Input } from "@angular/core";
+import { Directive, ElementRef, inject, input } from "@angular/core";
 
 @Directive({
   selector: "[appHighlight]",
+  host: {
+    "(mouseover)": "onMouseOver()",
+    "(mouseout)": "onMouseOut()",
+  },
 })
-export class HighlightDirective {
-  @Input() highlightColor: "blue" | "green" | "yellow" = "yellow";
+export class Highlight {
+  highlightColor = input<"blue" | "green" | "yellow">("yellow");
 
   private elementRef = inject(ElementRef);
 
-  @HostListener("mouseover")
   onMouseOver() {
-    this.elementRef.nativeElement.style.color = this.highlightColor;
+    this.elementRef.nativeElement.style.color = this.highlightColor();
   }
 
-  @HostListener("mouseout")
   onMouseOut() {
     this.elementRef.nativeElement.style.color = "initial";
   }
@@ -69,29 +73,31 @@ export class HighlightDirective {
 ```
 
 როცა ჩვენ ელემენტზე მოვათავსებთ `appHighlight` დირექტივს, მასზე იმუშავებს ამ დირექტივის კლასში
-არსებული ლოგიკა. ანუ `Input` დეკორატორით შექმნილი თვისება არსებულ ელემენტზე შესაძლებელია
+არსებული ლოგიკა. `input()` ფუნქციით შექმნილი თვისება არსებულ ელემენტზე შესაძლებელია
 მიებას მშობელი ელემენტიდან data binding-ით. `highlightColor`-ში რამდენიმე შესაძლო მნიშვნელობის
-ტიპი განსვსაზღვრეთ და წინასწარი ფერიც დავუწერეთ.
+ტიპი განვსაზღვრეთ და წინასწარი ფერიც დავუწერეთ. ვინაიდან `input()` სიგნალს ქმნის,
+მის მნიშვნელობას ფუნქციის დაძახებით ვიღებთ: `this.highlightColor()`.
 
-კონსტრუქტორში შემოგვაქვს `ElementRef`, იგი იმ native ელემენტზე გვაძლევს წვდომას, რომელზეც
-ეს დირექტივი იჯდება. მას host ელემენტი ჰქვია. `ElementRef`-ის საშუალებით `HostListener`-ებში გარკვეული მოვლენების
+კლასში შემოგვაქვს `ElementRef`, იგი იმ native ელემენტზე გვაძლევს წვდომას, რომელზეც
+ეს დირექტივი იჯდება. მას [host ელემენტი](/at-host/) ჰქვია. `ElementRef`-ის საშუალებით გარკვეული მოვლენების
 მიხედვით ვცვლით ამ ელემენტში CSS თვისებას - `color` (რაც დიდად ჩვეულებრივი ჯავასკრიპტისგან არ განსხვავდება).
 
-`HostListener` არის დეკორატორი, რომელიც საშუალებას გვაძლევს, მოვუსმინოთ ივენთებს host ელემენტზე. `HostListener`
-გამოიყენება კომპონენტის კლასებშიც, თუმცა უფრო ხშირად ის დირექტივებში გვხვდება.
+`host` კონფიგურაციაში host ელემენტზე ივენთებს ვუსმენთ — სინტაქსი იგივეა, რაც თემფლეითში.
 `mouseover` მოვლენის შემთხვევაში ელემენტს ჩვენთვის სასურველი ფერი მიენიჭება,
 ხოლო როცა მაუსი მის არეალს დატოვებს, ფერი საწყის მდგომარეობას დაუბრუნდება.
+ძველ კოდში ამის ნაცვლად `@HostListener` დეკორატორი გხვდებათ — მის შესახებ
+[Host ელემენტის თავში](/at-host/) ვსაუბრობთ.
 
-`HilightDirective` არის standalone ტიპის დირექტივი, რაც იმას ნიშნავს, რომ მის გამოსაყენებლად საჭიროა
+`Highlight` არის standalone ტიპის დირექტივი, რაც იმას ნიშნავს, რომ მის გამოსაყენებლად საჭიროა
 ამ კლასის დამატება კომპონენტის იმპორტების სიაში. ჩვენ ამ დირექტივს `App`-ში ვიყენებთ.
 
 ```ts
 import { Component } from "@angular/core";
-import { HighlightDirective } from "./highlight.directive";
+import { Highlight } from "./highlight";
 
 @Component({
   // ...
-  imports: [HighlightDirective],
+  imports: [Highlight],
   // ...
 })
 export class App {}
@@ -112,10 +118,10 @@ export class App {}
 სტრინგის ტიპის მნიშვნელობას. ოთხკუთხედი ფრჩხილებით `blue` არა სტრინგი, არამედ ცვლადის სახელი იქნებოდა,
 როგორც ჯავასკრიპტის ექსპფრეშენი, ამისთვის სათანადო სახელის თვისება უნდა არსებობდეს `App`-ის კლასში.
 
-შესაძლებელია დირექტივში არსებობდეს სელექტორის სახელის მქონე `Input` თვისება:
+შესაძლებელია დირექტივში არსებობდეს სელექტორის სახელის მქონე input:
 
 ```ts
-@Input() appHighlight: "blue" | "green" | "yellow" = "yellow";
+appHighlight = input<"blue" | "green" | "yellow">("yellow");
 ```
 
 ასე პირდაპირ დირექტივის სელექტორსვე შეგვიძლია გადავცეთ ფერი:

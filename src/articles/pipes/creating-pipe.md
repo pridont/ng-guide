@@ -53,7 +53,7 @@ CLI-ს დახმარებით.
 ng generate pipe my-filter
 ```
 
-ანგულარი შექმნის ფაილს, რომელიც შეიცავს ჩვენი ფაიფის სახელს + `.pipe.ts`.
+ანგულარი შექმნის ფაილს, რომელიც შეიცავს ჩვენი ფაიფის სახელს + `-pipe.ts`.
 ამ ფაილში დაექსpორტებულია ჩვენი ფაიფის კლასი, რომელიც `Pipe` დეკორატორით
 არის შექმნილი. ამ დეკორატორში შეგვიძლია ფაიფის კონფიგურაცია, მათ შორის იმ
 სახელის, რომლითაც ამ ფაიფს თემფლეითში გამოვიყენებთ. ჩვენი ფაიფის კლასი
@@ -88,7 +88,7 @@ export class MyFilterPipe implements PipeTransform {
 
 ```ts
 /* ... */
-import { MyFilterPipe } from "./my-filter.pipe";
+import { MyFilterPipe } from "./my-filter-pipe";
 
 @Component({
   selector: "app-root",

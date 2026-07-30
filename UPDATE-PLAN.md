@@ -17,7 +17,7 @@ TypeScript `~6.0.2` · RxJS `~7.8` · Vitest `^4.0.8` · jsdom `^28` ·
 
 გრეპის შედეგები (ფაილების რაოდენობა, სადაც პატერნი გვხვდება):
 
-| ძველი პატერნი | ფაილი | v21 შემცვლელი |
+| ძველი პატერნი | ფაილი | v22 შემცვლელი |
 |---|---|---|
 | `standalone: true` ხელით ჩაწერილი | 31 | წაშლა (v19-დან default) |
 | `imports: [CommonModule]` | 28 | წაშლა (`@if`/`@for`-ს არ სჭირდება) |
@@ -71,6 +71,12 @@ v21-ის ხერხემალი: `signal` + `resource` + zoneless.
 2. სტილის კონვენციის დაფიქსირება მთელი წიგნისთვის:
    - ფაილი: `user-profile.ts`, არა `user-profile.component.ts`
    - კლასი: `UserProfile`, არა `UserProfileComponent`
+   - **CLI-ვერიფიცირებული დასახელებები (v22):**
+     component / service / directive → სუფიქსის **გარეშე**
+     (`cart.ts` + `Cart`, `highlight.ts` + `Highlight`);
+     pipe / guard / resolver / interceptor → **დეფისიანი** სუფიქსით
+     (`products-pipe.ts` + `ProductsPipe`, `auth-guard.ts` + `authGuard`).
+     წერტილიანი ფორმა (`x.service.ts`) ყველგან ამოვარდა.
    - `inject()` ყოველთვის, `constructor` DI არასდროს
    - `@if`/`@for`/`@switch` ყოველთვის
    - `standalone: true` არასდროს არ იწერება
@@ -107,7 +113,7 @@ v21-ის ხერხემალი: `signal` + `resource` + zoneless.
 | `tests/index.md` | Karma/Jasmine → **Vitest**. `ng test`-ის output იცვლება. Karma დარჩეს ერთი აბზაცით, როგორც legacy. |
 | `authentication/*` | `@auth0/angular-jwt` მთლიანად ამოვარდება — მაგალითი თვითკმარი ხდება. დეტალები ქვემოთ. |
 | `standalone/*` (3 ფაილი) | თავი აღარ არის საჭირო — standalone default-ია. Routing/lazy-loading ნაწილი გადავიდეს `routing/`-ში, დანარჩენი წაიშალოს. |
-| `state-management/*` (7 ფაილი) | მთელი თავი `BehaviorSubject`-ზეა. გადაიწეროს signal-based store-ზე (`signal` + `computed` + `resource`). RxJS ვერსია დარჩეს ცალკე დანართად. |
+| `state-management/*` (7 ფაილი) | მთელი თავი `BehaviorSubject`-ზეა. გადაიწეროს signal-based store-ზე (`signal` + `computed` + `asReadonly`). RxJS ვერსია მთლიანად ამოვარდება — მხოლოდ ისტორიული შედარება რჩება შეჯამებაში. |
 | `ng-modules/index.md` | დარჩეს, მაგრამ გადავიდეს "Legacy" სექციაში, გაფრთხილებით. |
 | `directives/structural-directives.md` | `*ngIf`/`*ngFor` აღწერა → `@if`/`@for`. custom structural directive-ის ნაწილი (`ng-template`) რჩება. |
 
@@ -257,7 +263,7 @@ isTokenExpired() {
 - `ALLOWED_HOSTS` შედარება hostname-ზე უნდა იყოს, არა `url.includes()`-ზე —
   სხვაგვარად `https://evil.com/?x=dummyjson.com` ტესტს გაივლიდა.
 
-#### ვერიფიკაციის სტატუსი
+#### ვერიფიკაციის სტატუსი (შესრულებულია)
 
 ზემოთ მოცემული კოდი **უკვე შემოწმებულია**: v22 პროექტში `ng build` სუფთად
 გაირბინა, ხოლო `decodeToken`/`isTokenExpired` node-ზე გატესტდა ექვს
@@ -286,6 +292,12 @@ v21-ის მთავარი თემები, რომლებიც �
 12. Component lifecycle სრულად (`guide/components/lifecycle.md`)
 
 **v22-ის სპეციფიკური ცვლილებები (ყველგან უნდა აისახოს):**
+- **`@Service()` დეკორატორი** — v22-ის სიახლე, `@Injectable({providedIn:'root'})`-ის
+  მოკლე ჩანაწერი. CLI-ის `ng generate service` სწორედ მას ქმნის.
+  მხოლოდ `inject()`-თან მუშაობს, კონსტრუქტორ-DI-ს არ უჭერს მხარს.
+  `@Injectable` რჩება არა-root სქოუფებისა და `useClass`/`useFactory`-ისთვის.
+- **`HttpClient` ნაგულისხმევად ხელმისაწვდომია** v21+ -ში.
+  `provideHttpClient()` მხოლოდ კონფიგურაციისთვის (ინტერსეპტორები და ა.შ).
 - `ChangeDetectionStrategy.OnPush` — **default** v22-დან. წიგნში `OnPush`
   როგორც "ოპტიმიზაცია" აღარ უნდა იყოს ნახსენები.
 - Optional chaining `?.` თემფლეითში — v22-მდე `null`-ს აბრუნებდა,

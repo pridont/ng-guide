@@ -4,48 +4,61 @@ title: "შექმნა და გამოყენება"
 
 # შექმნა და გამოყენება
 
-კომპონენტების (ისევე, როგორც დირექტივებისა და ფაიფების) შექმნა შეიძლება მათი შემქმნელი
-დეკორატორის კონფიგურაციის ობიექტში `standalone` თვისების`true`-ზე დაყენებით:
+დღეს კომპონენტები, დირექტივები და ფაიფები ნაგულისხმევად standalone-ია —
+არაფრის დამატება არ გვჭირდება:
 
 ```ts
 @Component({
-  standalone: true,
-  selector: "image-grid",
-  imports: [ImageGridComponent],
-  templateUrl: "./image-grid.component.ts",
+  selector: "app-image-grid",
+  templateUrl: "./image-grid.html",
 })
-export class ImageGridComponent {
+export class ImageGrid {
   // component logic
 }
 ```
+
+**ისტორიული შენიშვნა:** მე-14 ვერსიიდან მე-19 ვერსიამდე ამისთვის
+დეკორატორში `standalone: true` უნდა ჩაგვეწერა. მე-19-დან ეს ნაგულისხმევი
+მნიშვნელობაა. ძველ კოდში `standalone: true` მაინც ბევრგან შეგხვდებათ —
+ის უვნებელია, უბრალოდ ზედმეტია.
+
+`standalone: false` კი დღესაც აზრიან რამეს ნიშნავს: ის ეუბნება ანგულარს,
+რომ ეს კომპონენტი [`NgModule`-ის](/ng-modules/) ნაწილია.
+
+## კომპონენტების გამოყენება ერთმანეთში
 
 თუ ამ კომპონენტის სადმე გამოყენება დაგვჭირდება, მას არ ვარეგისტრირებთ `NgModule`-ში,
-არამედ პირდაპირ ვაიმპორტებთ იმ დამოუკიდებელ კომპონენტში, რომელშიც ის დაგვჭირდება:
+არამედ პირდაპირ ვაიმპორტებთ იმ კომპონენტში, რომელშიც ის დაგვჭირდება:
 
 ```ts
+import { Component } from "@angular/core";
+import { ImageGrid } from "./image-grid";
+
 @Component({
-  standalone: true,
-  selector: "photo-gallery",
-  imports: [ImageGridComponent],
-  template: ` ... <image-grid [images]="imageList"></image-grid> `,
+  selector: "app-photo-gallery",
+  imports: [ImageGrid],
+  template: ` ... <app-image-grid [images]="imageList" /> `,
 })
-export class PhotoGalleryComponent {
+export class PhotoGallery {
   // component logic
 }
 ```
 
-`imports` ველში ასევე შეიძლება დამოუკიდებელი ფაიფებისა და დირექტივების შემოტანაც.
+`imports` ველში ასევე შეიძლება ფაიფებისა და დირექტივების შემოტანაც.
 
-## NgModule-ების შემოტანა დამოუკიდებელ კომპონენტებში
+სწორედ ეს არის standalone-ის მთავარი აზრი: **კომპონენტი თვითონ აცხადებს,
+რა სჭირდება**. ცალკე ფაილში წასვლა და მოდულის დეკლარაციების სიის რედაქტირება
+აღარ არის საჭირო.
 
-თუ ჩვენ აპლიკაციაში გვჭირდება ფუნქციონალი, რომლებიც არ არიან standalone და
-მოდულებში არიან შეკრული, მაშინ შეგვიძლია ამ მოდულების კომპონენტში პირდაპირ
-შემოტანა `imports` მასივში:
+## NgModule-ების შემოტანა კომპონენტებში
+
+თუ ჩვენ აპლიკაციაში გვჭირდება ფუნქციონალი, რომელიც standalone არ არის და
+მოდულებშია შეკრული (მაგალითად ძველი ბიბლიოთეკა), მაშინ შეგვიძლია ამ
+მოდულის კომპონენტში პირდაპირ შემოტანა `imports` მასივში:
 
 ```ts
 @Component({
-  standalone: true,
-  selector: "photo-gallery",
+  selector: "app-photo-gallery",
   // an existing module is imported directly into a standalone component
   imports: [MatButtonModule],
   template: `
@@ -53,69 +66,86 @@ export class PhotoGalleryComponent {
     <button mat-button>Next Page</button>
   `,
 })
-export class PhotoGalleryComponent {
+export class PhotoGallery {
   // logic
 }
 ```
 
 ასე `MatButtonModule`-ში არსებული ყველა დაექსპორტებული კომპონენტი, ფაიფი თუ დირექტივი
-ხელმისაწვდომია `PhotoGalleryComponent`-ში.
+ხელმისაწვდომია `PhotoGallery`-ში.
 
-## დამოუკიდებელი კომპონენტის შეტანა NgModule-ში
+## კომპონენტის შეტანა NgModule-ში
 
-ანალოგიურად, შესაძლებელია დამოუკიდებელი კომპონენტების შეტანა NgModule-ზე დაფუძნებულ
+ანალოგიურად, შესაძლებელია standalone კომპონენტების შეტანა NgModule-ზე დაფუძნებულ
 კონტექსტშიც. ეს უზრუნველყოფს შესაძლებლობას, რომ ძველი აპლიკაციები ეტაპობრივად და
 მარტივად გადავიყვანოთ NgModule სისტემიდან standalone სისტემაზე.
 
 ```ts
 @NgModule({
-  declarations: [AlbumComponent],
-  exports: [AlbumComponent],
-  imports: [PhotoGalleryComponent],
+  declarations: [Album],
+  exports: [Album],
+  imports: [PhotoGallery],
 })
 export class AlbumModule {}
 ```
 
-თუმცა `PhotoGalleryComponent` არის standalone, მისი დაიმპორტება ძველებური მეთოდითაც
-შეიძლება.
+`PhotoGallery` standalone-ია, მაგრამ მისი დაიმპორტება ძველებური მეთოდითაც
+შეიძლება — მოდულის `imports` მასივში.
 
-ასერომ, დამოუკიდებელი კომპონენტები არ მოდიან კონფლიქტში ანგულარის წინა ვერსიის
+ასერომ, standalone კომპონენტები არ მოდიან კონფლიქტში ანგულარის ძველ
 მოდულებთან. რაღაც თვალსაზრისით, ახლა თითოეული კომპონენტი არის თვითკმარი მოდული.
 
 ## Bootstrapping
 
 ასეთი სისტემით `main.ts`-ში bootstrap განსხვავებულად ხდება. იმის მაგივრად, რომ ეს
 მოხდეს მთლიან მოდულზე, გამოიყენება ფუნქცია `bootstrapApplication` რომელიც აპლიკაციის
-მთავარ დამოუკიდებელ კომპონენტს იღებს:
+მთავარ კომპონენტს იღებს:
 
 ```ts
 import { bootstrapApplication } from "@angular/platform-browser";
-import { PhotoAppComponent } from "./app/photo.app.component";
+import { App } from "./app/app";
 
-bootstrapApplication(PhotoAppComponent);
+bootstrapApplication(App);
 ```
 
-მეორე არგუმენტად ობიექტში, providers მასივში შესაძლებელია ისეთი მოდულების შემოტანა
-რომლებიც (ძველი მიდგომით) `forRoot` ფუნქციაზე დაძახებას საჭიროებენ:
+CLI-ით შექმნილ პროექტში მეორე არგუმენტად კონფიგურაცია გადაეცემა, რომელიც
+ცალკე `app.config.ts` ფაილშია:
 
 ```ts
-import { LibraryModule } from "ngmodule-based-library";
+import { bootstrapApplication } from "@angular/platform-browser";
+import { appConfig } from "./app/app.config";
+import { App } from "./app/app";
 
-bootstrapApplication(PhotoAppComponent, {
-  providers: [importProvidersFrom(LibraryModule.forRoot())],
-});
+bootstrapApplication(App, appConfig).catch((err) => console.error(err));
 ```
 
-აქვე შეიძლება DI-ს კონფიგურაციაც:
+კონფიგურაციის `providers` მასივში DI-ის კონფიგურაციას ვწერთ:
 
 ```ts
-bootstrapApplication(PhotoAppComponent, {
+export const appConfig: ApplicationConfig = {
   providers: [
+    provideBrowserGlobalErrorListeners(),
     {
       provide: BACKEND_URL,
       useValue: "https://photoapp.looknongmodules.com/api",
     },
     // ...
   ],
-});
+};
 ```
+
+აქვე შესაძლებელია ისეთი ძველი მოდულების შემოტანა, რომლებიც `forRoot`
+ფუნქციაზე დაძახებას საჭიროებენ. ამისთვის `importProvidersFrom` გამოიყენება:
+
+```ts
+import { importProvidersFrom } from "@angular/core";
+import { LibraryModule } from "ngmodule-based-library";
+
+export const appConfig: ApplicationConfig = {
+  providers: [importProvidersFrom(LibraryModule.forRoot())],
+};
+```
+
+`importProvidersFrom` ერთგვარი ხიდია ძველ, მოდულებზე დაფუძნებულ
+ბიბლიოთეკებთან. თუ ბიბლიოთეკას თანამედროვე `provideXyz()` ფუნქცია აქვს,
+ყოველთვის ის უნდა ვირჩიოთ.

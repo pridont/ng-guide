@@ -22,18 +22,28 @@ title: "HTTP მოთხოვნებთან მუშაობა"
 
 # HTTP Client
 
-HTTP მოთხოვნებთან სამუშაოდ ვიყენებთ ანგულარში ჩაშენებულ პროვადერებს,
-რომლებიც უნდა აპლიკაციის პროვაიდერებში დავარეგისტრიროთ. `app.config.ts`-ში
-პროვაიდერების მასივში ვიყენებთ `provideHttpClient()`-ს `@angular/common/http`-დან.
+HTTP მოთხოვნებთან სამუშაოდ ვიყენებთ `HttpClient`-ს `@angular/common/http`-დან.
+ანგულარის 21-ე ვერსიიდან ის **ნაგულისხმევად ხელმისაწვდომია** — მისი
+დასაინჯექთებლად არაფრის დარეგისტრირება არ გვჭირდება.
+
+`provideHttpClient()` მაშინ დაგვჭირდება, როცა HTTP-ის კონფიგურაცია გვინდა,
+მაგალითად [ინტერსეპტორების](#interceptors) დამატება. მას `app.config.ts`-ში
+პროვაიდერების მასივში ვწერთ:
 
 ```ts
-import { ApplicationConfig } from "@angular/core";
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from "@angular/core";
 import { provideHttpClient } from "@angular/common/http";
 
 export const appConfig: ApplicationConfig = {
-  providers: [/* ... */ provideHttpClient()],
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(/* კონფიგურაცია, მაგ. withInterceptors(...) */),
+  ],
 };
 ```
+
+**შენიშვნა:** ძველ სახელმძღვანელოებში `provideHttpClient()` სავალდებულოდ
+არის მოხსენიებული. ეს 20-ე ვერსიამდე მართლაც ასე იყო.
 
 ამ გაკვეთილში ბექენდის სიმულაციისთვის ვისარგებლებთ dummyjson.com-ით,
 რომელიც ონლაინ მაღაზიის სერვერის სიმულაციას აკეთებს. მის გამოსაყენებლად
@@ -86,10 +96,10 @@ HTTP მოთხოვნების ლოგიკისთვის ხშ�
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { AddProduct, GetProductsResponse, Product } from "./product.model";
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class ProductsService {
   baseUrl = "https://dummyjson.com";
 
@@ -116,7 +126,7 @@ app.ts:
 ```ts
 import { Component, inject, OnInit } from "@angular/core";
 import { AddProduct, Product } from "./product.model";
-import { ProductsService } from "./products.service";
+import { ProductsService } from "./products-service";
 
 @Component({
   selector: "app-root",
@@ -140,7 +150,7 @@ export class App implements OnInit {
 
 წინასწარ აპლიკაცია იქნება ჩატვირთვის რეჟიმში, და შეგვიძლია ეს ავსახოთ
 `loading` თვისებაში. აქვე შევქმნათ პროდუქტების სია, რომელიც თავიდან
-იქნება ცარიელი. კონსტრუქტორში ვაინჯექთებთ `ProductsService`-ს და
+იქნება ცარიელი. კლასში ვაინჯექთებთ `ProductsService`-ს და
 `ngOnInit`-ში მას ვუძახებთ. მხოლოდ დაძახება საკმარისი არ არის,
 რადგან მოთხოვნა არ გაიგზავნება, თუ ჩვენ მასზე არ დავასუბსქრაიბეთ.
 დასუბსქრაიბებისას შეგვიძლია უკვე ჩავწვდეთ დაბრუნებულ პასუხს.
@@ -185,10 +195,10 @@ export class App implements OnInit {
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import { AddProduct, GetProductsResponse, Product } from "./product.model";
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class ProductsService {
   baseUrl = "https://dummyjson.com";
 
@@ -231,7 +241,7 @@ export class ProductsService {
 ```ts
 import { Component, inject, OnInit } from "@angular/core";
 import { AddProduct, Product } from "./product.model";
-import { ProductsService } from "./products.service";
+import { ProductsService } from "./products-service";
 
 @Component({
   selector: "app-root",
@@ -338,12 +348,223 @@ export class App implements OnInit {
 - პროდუქტის წაშლა,
 - არსებული პროდუქტის განახლება.
 
+## httpResource — რეაქტიული წაკითხვა
+
+დააკვირდით, რამდენი შრომა დაგვჭირდა მხოლოდ პროდუქტების *ჩვენებისთვის*:
+გამოვაცხადეთ `products` მასივი, გამოვაცხადეთ `loading` ფლაგი, დავწერეთ
+`ngOnInit`, დავასუბსქრაიბეთ, ქოლბექში ორივე თვისება განვაახლეთ. ერორის
+დამუშავება კი საერთოდ არ გაგვიკეთებია.
+
+ეს პატერნი — "მოთხოვნა გაგზავნე, შედეგი სთეითში შეინახე, მოლოდინის რეჟიმი
+და ერორი ასახე" — ისე ხშირად მეორდება, რომ ანგულარმა ის ჩაშენებულ
+ხელსაწყოდ აქცია: `httpResource`.
+
+`httpResource` არის `HttpClient`-ის რეაქტიული გარსი, რომელიც მოთხოვნის
+სტატუსსა და პასუხს [სიგნალების](/signals/) სახით გვაძლევს.
+
+```ts
+import { httpResource } from "@angular/common/http";
+import { Component } from "@angular/core";
+import { GetProductsResponse } from "./product.model";
+
+@Component({
+  selector: "app-root",
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
+})
+export class App {
+  productsResource = httpResource<GetProductsResponse>(
+    () => "https://dummyjson.com/products"
+  );
+}
+```
+
+მთელი `ngOnInit`, `subscribe`, `loading` და `products` ერთ ხაზად შეიკუმშა.
+თემფლეითში:
+
+```html
+@if (productsResource.isLoading()) {
+  <div>loading...</div>
+}
+
+@if (productsResource.error()) {
+  <div>Something went wrong!</div>
+}
+
+@if (productsResource.hasValue()) {
+  <div>
+    @for (product of productsResource.value().products; track product.id) {
+      <div class="product-card">
+        <img [src]="product.thumbnail" [alt]="product.title" />
+        <h3>{{ product.title }}</h3>
+        <p>{{ product.price | currency }}</p>
+      </div>
+    }
+  </div>
+}
+```
+
+`httpResource` თავისი თვისებებით გვაძლევს შემდეგ სიგნალებს:
+
+- `value()` — პასუხის სხეული
+- `hasValue()` — არსებობს თუ არა მნიშვნელობა (ტაიპსკრიპტისთვის type guard-იც არის)
+- `isLoading()` — მიმდინარეობს თუ არა მოთხოვნა
+- `error()` — ერორი, ასეთის არსებობის შემთხვევაში
+- `status()` — დეტალური სტატუსი
+
+აქვე არსებობს `reload()` მეთოდი, თუ მოთხოვნის ხელახლა გაგზავნა გვინდა.
+
+### რატომ ფუნქცია და არა სტრინგი?
+
+ყურადღება მიაქციეთ, რომ `httpResource`-ს **ფუნქციას** ვაწვდით, და არა
+პირდაპირ მისამართს. ეს იმიტომ, რომ ეს ფუნქცია რეაქტიულია: თუ მასში
+რომელიმე სიგნალს წავიკითხავთ, სიგნალის შეცვლისთანავე **ახალი მოთხოვნა
+ავტომატურად გაიგზავნება**.
+
+```ts
+export class ProductDetails {
+  productId = input.required<string>();
+
+  productResource = httpResource<Product>(
+    () => `https://dummyjson.com/products/${this.productId()}`
+  );
+}
+```
+
+აქ საკმარისია მშობელმა `productId` შეცვალოს — და პროდუქტი თავისით
+ჩამოიტვირთება. თუ წინა მოთხოვნა ჯერ არ დასრულებულა, `httpResource`
+მას **გააუქმებს** და ახალს გაგზავნის. ეს სწორედ ის ლოგიკაა, რომელსაც
+RxJS-ში `switchMap`-ით ვწერდით.
+
+უფრო რთული მოთხოვნებისთვის სტრინგის ნაცვლად ობიექტს ვაბრუნებთ:
+
+```ts
+productsResource = httpResource<GetProductsResponse>(() => ({
+  url: "https://dummyjson.com/products",
+  method: "GET",
+  params: { limit: this.limit() },
+  headers: { "X-Special": "true" },
+}));
+```
+
+### `httpResource` თუ `HttpClient`?
+
+ერთი მნიშვნელოვანი განსხვავება: `HttpClient` მოთხოვნას მხოლოდ
+დასუბსქრაიბებისას აგზავნის, ხოლო `httpResource` — **მაშინვე**.
+
+აქედან გამომდინარეობს მათი შერჩევის კრიტერიუმი:
+
+- **მონაცემების წაკითხვა** (GET), რომელიც აპლიკაციის სთეითიდან გამომდინარეობს
+  → `httpResource`
+- **მონაცემების შეცვლა** (POST, PUT, PATCH, DELETE), რომელიც კონკრეტულ
+  მოქმედებაზე უნდა მოხდეს → `HttpClient`
+
+ანუ ჩვენი მაგალითში პროდუქტების სიის ჩვენება `httpResource`-ის საქმეა,
+ხოლო `addProduct`, `deleteProduct` და `editProduct` — `HttpClient`-ის.
+შეცვლის შემდეგ სიის განახლება `productsResource.reload()`-ით ხდება.
+
+## Interceptors
+
+ვთქვათ ყველა მოთხოვნას ერთი და იგივე ჰედერი უნდა დავამატოთ (მაგალითად
+საავთენტიფიკაციო ტოკენი), ან ყველა მოთხოვნა უნდა დავლოგოთ. ამის ყოველ
+მეთოდში ხელით წერა ცუდი იდეაა.
+
+**ინტერსეპტორი** არის ერთგვარი middleware, რომელიც ყოველი მოთხოვნისთვის
+ეშვება და შეუძლია ის შეცვალოს, პასუხს ჩაწვდეს, ან სულაც შეაჩეროს.
+
+ინტერსეპტორი ჩვეულებრივი ფუნქციაა `HttpInterceptorFn` ტიპის. მას ორი
+პარამეტრი აქვს: გამავალი მოთხოვნა და `next` ფუნქცია, რომელიც მოთხოვნას
+ჯაჭვის შემდეგ რგოლს გადასცემს.
+
+`logging-interceptor.ts`:
+
+```ts
+import { HttpInterceptorFn } from "@angular/common/http";
+
+export const loggingInterceptor: HttpInterceptorFn = (req, next) => {
+  console.log(req.method, req.url);
+  return next(req);
+};
+```
+
+მოთხოვნის შესაცვლელად მას `clone` მეთოდით ვაკოპირებთ. `HttpRequest`
+**უცვლელი (immutable) ობიექტია** — მისი პირდაპირ მოდიფიცირება არ შეიძლება:
+
+`auth-interceptor.ts`:
+
+```ts
+import { HttpInterceptorFn } from "@angular/common/http";
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    return next(req);
+  }
+
+  return next(
+    req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` },
+    })
+  );
+};
+```
+
+ინტერსეპტორების დარეგისტრირება `provideHttpClient`-ში ხდება,
+`withInterceptors` ფუნქციით:
+
+```ts
+import { provideHttpClient, withInterceptors } from "@angular/common/http";
+import { authInterceptor } from "./auth-interceptor";
+import { loggingInterceptor } from "./logging-interceptor";
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideHttpClient(withInterceptors([loggingInterceptor, authInterceptor])),
+  ],
+};
+```
+
+ინტერსეპტორები **მასივში მითითებული რიგით** ეშვება: ამ მაგალითში
+მოთხოვნას ჯერ `loggingInterceptor` დაამუშავებს და შემდეგ `authInterceptor`-ს
+გადასცემს.
+
+ვინაიდან ინტერსეპტორი ფუნქციაა და არა კლასი, მასში `inject()`-ის
+გამოყენებაც შეგვიძლია — ის injection context-ში ეშვება:
+
+```ts
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  /* ... */
+};
+```
+
+**შენიშვნა:** ძველ პროექტებში ინტერსეპტორები კლასებით იწერებოდა
+(`HttpInterceptor` ინტერფეისით) და `HTTP_INTERCEPTORS` ტოკენით
+რეგისტრირდებოდა, ხოლო `provideHttpClient`-ს `withInterceptorsFromDi()`
+სჭირდებოდა. ანგულარის ოფიციალური რეკომენდაციაა ფუნქციური
+ინტერსეპტორების გამოყენება — მათი ქცევა უფრო პროგნოზირებადია.
+
+ინტერსეპტორების პრაქტიკულ გამოყენებას [JWT ავთენტიფიკაციის
+თავში](/authentication/jwt-authentication.html) ვნახავთ.
+
 ### შეჯამება
 
-ამ თავში ჩვენ ვისწავლეთ ანგულარში მარტივი HTTP მოთხოვნების გაგზავნა
-და შედეგის აპლიკაციის სთეითში განთავსება. ჩვენ HTTP მოთხოვნებისთვის
-ცალკე შევქმენით სერვიცი სადაც დავაინჯექთეთ HttpClient და მასზე
-დავუძახეთ სხვადასხვა ტიპის მეთოდებს. ჩვენ ამ მეთოდების მიერ დაბრუნებული
-ტიპების განსაზღვრის საშუალებაც გვაქვს. კომპონენტში ამ მეთოდებზე
-აუცილებლად ვასუბსქრაიბებთ რათა ერთი მხრივ, მოთხოვნა გაიგზავნოს და,
-მეორემხრივ, რათა შედეგი მივიღოთ და ის სთეითში გამოვსახოთ.
+ამ თავში ჩვენ ვისწავლეთ ანგულარში HTTP მოთხოვნების გაგზავნა
+და შედეგის აპლიკაციის სთეითში განთავსება.
+
+`HttpClient` არის დაბალი დონის API: ცალკე შევქმენით სერვისი, სადაც
+დავაინჯექთეთ `HttpClient` და მასზე დავუძახეთ სხვადასხვა ტიპის მეთოდებს.
+ჩვენ ამ მეთოდების მიერ დაბრუნებული ტიპების განსაზღვრის საშუალებაც გვაქვს.
+კომპონენტში ამ მეთოდებზე აუცილებლად ვასუბსქრაიბებთ, რათა, ერთი მხრივ,
+მოთხოვნა გაიგზავნოს და, მეორე მხრივ, რათა შედეგი მივიღოთ და ის სთეითში გამოვსახოთ.
+
+`httpResource` კი მაღალი დონის, რეაქტიული ხელსაწყოა: ის მოთხოვნას
+მაშინვე აგზავნის და შედეგს სიგნალების სახით გვაძლევს, ამიტომ
+`loading`/`error` თვისებების ხელით მართვა აღარ გვჭირდება. მონაცემების
+წაკითხვისთვის სწორედ ის უნდა გამოვიყენოთ, ხოლო მონაცემების შეცვლისთვის —
+`HttpClient`.
+
+ინტერსეპტორებით ყველა მოთხოვნას ერთიან ლოგიკას ვამატებთ: ჰედერებს,
+ლოგირებას, ერორების დამუშავებას.

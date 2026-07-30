@@ -89,7 +89,7 @@ export class App {
 hero-list.ts
 
 ```ts
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 import { Hero } from "../types/hero";
 
 @Component({
@@ -97,7 +97,7 @@ import { Hero } from "../types/hero";
   template: `
     <h2>Pick the hero</h2>
     <ul>
-      @for (hero of heroes; track hero.name) {
+      @for (hero of heroes(); track hero.name) {
         <li (click)="heroPicked.emit(hero.name)">{{ hero.name }}</li>
       }
     </ul>
@@ -114,8 +114,8 @@ import { Hero } from "../types/hero";
   ],
 })
 export class HeroList {
-  @Input() heroes!: Hero[];
-  @Output() heroPicked = new EventEmitter<string>();
+  heroes = input.required<Hero[]>();
+  heroPicked = output<string>();
 }
 ```
 
@@ -126,22 +126,22 @@ HeroDetails-ის hero თვისებაზე, მაშინ ამ უ�
 hero-details.ts
 
 ```ts
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
+import { Component, input } from "@angular/core";
 import { Hero } from "../types/hero";
 
 @Component({
   selector: "app-hero-details",
   template: `
-    @if (hero) {
+    @if (hero(); as pickedHero) {
       <div>
-        <h2>{{ hero.name }}</h2>
-        <p>{{ hero.description }}</p>
+        <h2>{{ pickedHero.name }}</h2>
+        <p>{{ pickedHero.description }}</p>
       </div>
     }
   `,
 })
 export class HeroDetails {
-  @Input() hero!: Hero;
+  hero = input.required<Hero>();
 }
 ```
 

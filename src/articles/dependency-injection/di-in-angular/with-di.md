@@ -47,7 +47,7 @@ export class App {}
 ```
 
 აქ არანაირი ლოგიკა აღარ გვექნება, სანაცვლოდ გმირებზე ლოგიკას გავიტანთ სერვისში.
-ვქმნით ფაილს hero.service.ts:
+ვქმნით ფაილს hero-service.ts:
 
 ```ts
 import { Injectable } from "@angular/core";
@@ -90,12 +90,47 @@ injection შეძლოს. აქ შეგვიძლია `providedIn` �
 `root` გულისხმობს აპლიკაციის ფესვს, ანუ ის `app-root`-ში, ესეიგი ყველგან იქნება
 ხელმისაწვდომი.
 
+### `@Service()` — მოკლე ჩანაწერი
+
+`@Injectable({ providedIn: "root" })` სერვისების აბსოლუტურად უმეტესობის
+შემთხვევაში ერთი და იგივე იწერება. სწორედ ამიტომ ანგულარის 22-ე ვერსიაში
+გამოჩნდა `@Service()` დეკორატორი, რომელიც ზუსტად ამის მოკლე ჩანაწერია:
+
+```ts
+import { Service } from "@angular/core";
+
+@Service()
+export class HeroService {
+  /* ... */
+}
+```
+
+ეს არის იგივე, რაც `@Injectable({ providedIn: "root" })`. CLI-ის
+`ng generate service` დღეს სწორედ `@Service()`-ს ქმნის, ამიტომ
+ჩვეულებრივი, აპლიკაციის დონის სერვისებისთვის ის უნდა გამოვიყენოთ.
+
+`@Service()`-ს ერთი შეზღუდვა აქვს: ის **მხოლოდ `inject()` ფუნქციასთან
+მუშაობს**, კონსტრუქტორში დაინჯექთებას არ უჭერს მხარს. ვინაიდან `inject()`
+რეკომენდირებული მიდგომაა, ეს პრაქტიკაში პრობლემა არ არის.
+
+`@Injectable` კვლავ გვჭირდება მაშინ, როცა:
+
+- სერვისი აპლიკაციის ფესვში არ უნდა იყოს (მაგალითად კომპონენტის დონეზე,
+  როგორც ქვემოთ ვნახავთ)
+- პროვაიდერის დამატებითი კონფიგურაცია გვჭირდება (`useClass`, `useFactory` და ა.შ)
+- ძველი კოდს ვკითხულობთ
+
+ამ თავში `@Injectable`-ს დავტოვებთ, რადგან სწორედ `providedIn`-ის
+სხვადასხვა მნიშვნელობაზე გვინდა საუბარი, თუმცა შემთხვევათა უმეტესობაში `@Service()` უფრო გამოგადგებათ.
+
+### სერვისის მოქმედების არეალი
+
 შესაძლებელია სერვისი მხოლოდ კონკრეტული მოდულის ფარგლებშიც გავხადოთ
 ხელმისაწვდომი. მაშინ `providedIn` კონფიგურაციის მაგივრად, ეს კლასი უნდა
 შევიტანოთ `NgModule`-ის `providers` მასივში:
 
 ```ts
-import { HeroService } from './hero.service.ts'
+import { HeroService } from './hero-service.ts'
 @NgModule({
   // ... declarations, imports, etc.
   providers: [HeroService],
@@ -106,7 +141,7 @@ import { HeroService } from './hero.service.ts'
 `Component` დეკორატორში მისი `providers` მასივში დამატებაც:
 
 ```ts
-import { HeroService } from './hero.service.ts'
+import { HeroService } from './hero-service.ts'
 @Component({
   // ... selector, template, etc.
   providers: [HeroService]
@@ -147,7 +182,7 @@ _მხოლოდ `App`-ისთვის_.
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { HeroService } from "../hero.service";
+import { HeroService } from "../hero-service";
 
 @Component({
   selector: "app-hero-list",
@@ -204,7 +239,7 @@ ng generate @angular/core:inject
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { HeroService } from "../hero.service";
+import { HeroService } from "../hero-service";
 import { Hero } from "../types/hero";
 
 @Component({

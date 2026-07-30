@@ -50,15 +50,13 @@ export interface Product {
 
 პროდუქტს უნდა ჰქონდეს აიდი, სახელი, აღწერა, სურათი და ფასი.
 ასეთი ტიპის პროდუქტების სია და მათი აიდის მიხედვით მოპოვების
-ლოგიკა გვაქვს `products.service.ts`-ში:
+ლოგიკა გვაქვს `products-service.ts`-ში:
 
 ```ts
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { Product } from "./product.model";
 
-@Injectable({
-  providedIn: "root",
-})
+@Service()
 export class ProductsService {
   private products: Product[] = [
     {
@@ -107,7 +105,7 @@ Products უბრალოდ იღებს ამ პროდუქტე�
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { ProductsService } from "../products.service";
+import { ProductsService } from "../products-service";
 import { RouterLink } from "@angular/router";
 
 @Component({
@@ -151,7 +149,7 @@ export class Products {
 import { Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Product } from "../product.model";
-import { ProductsService } from "../products.service";
+import { ProductsService } from "../products-service";
 
 @Component({
   selector: "app-product-details",
@@ -220,7 +218,7 @@ observable-ში ახალ მნიშვნელობას გასც
 import { Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Product } from "../product.model";
-import { ProductsService } from "../products.service";
+import { ProductsService } from "../products-service";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
