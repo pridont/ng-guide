@@ -19,7 +19,6 @@ import { Directive, HostListener } from "@angular/core";
 
 @Directive({
   selector: "[appExample]",
-  standalone: true,
 })
 export class ExampleDirective {
   constructor() {}
@@ -38,24 +37,21 @@ export class ExampleDirective {
 იქნება, კონსოლში დავლოგავთ ტექსტს.
 
 შესაძლებელია window-ზე არსებული მოვლენების მოსმენაც, ამისთვის `HostListener`-ში
-არგუმენტს ვუწერთ პრეფიქსს `window:`. ამ მაგალითში ჩვენ `AppComponent` ში
+არგუმენტს ვუწერთ პრეფიქსს `window:`. ამ მაგალითში ჩვენ `App` ში
 enter ღილაკზე დაჭერას ვუსმენთ და საპასუხოდ კომპონენტის კლასში counter თვისებას
 ვზრდით, რომელსაც ინტერპოლაციით გამოვსახავთ.
 
 ```ts
 import { HostListener, Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app",
-  standalone: true,
-  imports: [CommonModule],
   template: ` <h1>
       Hello, you have pressed enter {{ counter }} number of times!
     </h1>
     Press enter key to increment the counter.`,
 })
-export class AppComponent {
+export class App {
   counter = 0;
   @HostListener("window:keydown.enter")
   handleKeyDown() {

@@ -86,14 +86,14 @@ HTTP მოთხოვნების ლოგიკისთვის ხშ�
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { AddProduct, GetProductsResponse, Product } from "./product.model";
 
 @Injectable({ providedIn: "root" })
 export class ProductsService {
   baseUrl = "https://dummyjson.com";
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   getAllProducts() {
     return this.http.get<GetProductsResponse>(`${this.baseUrl}/products`);
@@ -111,26 +111,23 @@ Observable. ჩვენ ვიცით რომ ის იქნება ჩ
 ტიპის.
 
 ახლა სასურველ კომპონენტში შეგვიძლია ამ მეთოდს დავუძახოთ.
-app.component.ts:
+app.ts:
 
 ```ts
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject, OnInit } from "@angular/core";
 import { AddProduct, Product } from "./product.model";
 import { ProductsService } from "./products.service";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   loading = true;
   products: Product[] = [];
 
-  constructor(private productsService: ProductsService) {}
+  private productsService = inject(ProductsService);
 
   ngOnInit() {
     this.productsService.getAllProducts().subscribe((response) => {
@@ -154,23 +151,29 @@ export class AppComponent implements OnInit {
 ისინი თემფლეითში გამოვსახოთ:
 
 ```html
-<div *ngIf="products.length">
-  <div class="product-card" *ngFor="let product of products">
-    <img [src]="product.thumbnail" [alt]="product.title" />
-    <h3>{{ product.title }}</h3>
-    <p>{{ product.description }}</p>
-    <p>{{ product.price | currency }}</p>
+@if (products.length) {
+  <div>
+    @for (product of products; track product.id) {
+      <div class="product-card">
+        <img [src]="product.thumbnail" [alt]="product.title" />
+        <h3>{{ product.title }}</h3>
+        <p>{{ product.description }}</p>
+        <p>{{ product.price | currency }}</p>
+      </div>
+    }
   </div>
-</div>
+}
 
-<div *ngIf="loading">loading...</div>
+@if (loading) {
+  <div>loading...</div>
+}
 ```
 
 როგორც ხედავთ აქ ქვემოთ ჩატვირთვის ინდიკატორიც გვაქვს, რომელიც
 თავიდან გამოჩნდება, მაგრამ მაშინ გაქრება როცა მოთხოვნა პასუხს
 დაგვიბრუნებს.
 
-პროდუქტებს უბრალოდ `NgFor` დირექტივით გამოვსახავთ.
+პროდუქტებს უბრალოდ `@for` ბლოკით გამოვსახავთ.
 ბრაუზერს თუ გავხსნით, დავინახავთ, რომ მომენტალურად
 `loading...` ტექსტი გამოჩნდება და შემდეგ მის ადგილას
 პროდუქტები გამოჩნდება.
@@ -182,14 +185,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { AddProduct, GetProductsResponse, Product } from "./product.model";
 
 @Injectable({ providedIn: "root" })
 export class ProductsService {
   baseUrl = "https://dummyjson.com";
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   getAllProducts() {
     return this.http.get<GetProductsResponse>(`${this.baseUrl}/products`);
@@ -223,26 +226,23 @@ export class ProductsService {
 პროდუქტის განახლებისთვის სერვერი იღებს put მოთხოვნას. ჩვენ განახლებულ
 პროდუქტს ვიღებთ პარამეტრში და მას ვაგზავნით ამ პროდუქტის აიდის მქონე ენდფოინთზე.
 
-ჩვენი app.component.ts ახლა ასე უნდა გამოიყურებოდეს:
+ჩვენი app.ts ახლა ასე უნდა გამოიყურებოდეს:
 
 ```ts
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject, OnInit } from "@angular/core";
 import { AddProduct, Product } from "./product.model";
 import { ProductsService } from "./products.service";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   loading = true;
   products: Product[] = [];
 
-  constructor(private productsService: ProductsService) {}
+  private productsService = inject(ProductsService);
 
   ngOnInit() {
     this.productsService.getAllProducts().subscribe((response) => {
@@ -256,7 +256,7 @@ export class AppComponent implements OnInit {
       title: "New Product",
       description: "This is a new test product!",
       price: 399,
-      thumbnail: "https://angular.io/assets/images/logos/angular/angular.svg",
+      thumbnail: "https://angular.dev/assets/images/press-kit/angular_wordmark_gradient.png",
     };
 
     this.productsService.addProduct(newProduct).subscribe((newProduct) => {
@@ -311,18 +311,24 @@ export class AppComponent implements OnInit {
 
 ```html
 <button (click)="addNewProduct()">Add new product</button>
-<div *ngIf="products.length">
-  <div class="product-card" *ngFor="let product of products">
-    <img [src]="product.thumbnail" [alt]="product.title" />
-    <h3>{{ product.title }}</h3>
-    <p>{{ product.description }}</p>
-    <p>{{ product.price | currency }}</p>
-    <button (click)="deleteProduct(product.id)">delete</button>
-    <button (click)="editProduct(product)">Edit</button>
+@if (products.length) {
+  <div>
+    @for (product of products; track product.id) {
+      <div class="product-card">
+        <img [src]="product.thumbnail" [alt]="product.title" />
+        <h3>{{ product.title }}</h3>
+        <p>{{ product.description }}</p>
+        <p>{{ product.price | currency }}</p>
+        <button (click)="deleteProduct(product.id)">delete</button>
+        <button (click)="editProduct(product)">Edit</button>
+      </div>
+    }
   </div>
-</div>
+}
 
-<div *ngIf="loading">loading...</div>
+@if (loading) {
+  <div>loading...</div>
+}
 ```
 
 ასე ჩვენი აპლიკაცია დაკავშირებულია ბექენდთან და ჩვენ შეგვიძლია:

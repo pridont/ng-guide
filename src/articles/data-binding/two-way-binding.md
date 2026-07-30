@@ -22,16 +22,13 @@ sizer კომპონენტი მარტივი პრინციპ
 
 ```ts
 import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-sizer",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./sizer.component.html",
-  styleUrl: "./sizer.component.css",
+  templateUrl: "./sizer.html",
+  styleUrl: "./sizer.css",
 })
-export class SizerComponent {
+export class Sizer {
   @Input() size!: number | string;
   @Output() sizeChange = new EventEmitter<number>();
 
@@ -64,7 +61,7 @@ export class SizerComponent {
 ```
 
 სანიმუშო ტექსტი, რომელიც ზომას შეიცვლის ამ sizer კომპონენტშიც გვექნება (`span`).
-ახლა app.component.html-ში შეგვიძლია განვათავსოთ sizer კომპონენტი და გამოვიყენოთ
+ახლა app.html-ში შეგვიძლია განვათავსოთ sizer კომპონენტი და გამოვიყენოთ
 მასზე ჩვენთვის ცნობილი ბაინდინგები:
 
 ```html
@@ -82,14 +79,14 @@ fontSizePx = 16;
 
 ახლა ფონტის ზომა უნდა იცვლებოდეს. აპლიკაციაში შემდეგი რამ ხდება:
 
-- თავდაპირველად, როცა აპლიკაცია იტვირთება, `AppComponent`-ში არსებული `fontSizePx`
-  გადაეცემა `SizerComponent`, რომელიც ინიციალიზაციისას სწორედ მის მნიშვნელობას შეინახავს
+- თავდაპირველად, როცა აპლიკაცია იტვირთება, `App`-ში არსებული `fontSizePx`
+  გადაეცემა `Sizer`-ს, რომელიც ინიციალიზაციისას სწორედ მის მნიშვნელობას შეინახავს
   `size` თვისებაში. სწორედ ამ ზომას გამოსახავს ეს კომპონენტი.
-- `SizerComponent`-ში ღილაკზე დაჭერით გააქტიურდება `dec` ან `inc` მეთოდი, რომელიც `resize` მეთოდს
+- `Sizer`-ში ღილაკზე დაჭერით გააქტიურდება `dec` ან `inc` მეთოდი, რომელიც `resize` მეთოდს
   დაუძახებს და შეცვლის ფონტის ზომას, ამასთანავე დააემითებს ამ ახალ ზომას.
-- ახალ დაემითებულ ზომას `AppComponent` ივენთ ბაინდინგის საშუალებით დააფიქსირებს და შეცვლის თავის
-  ფროფერთის `fontSizePx` რათა მან ეს ახალი მნიშვნელობა მიიღოს.
-- შედეგად იცვლება `AppComponent`-ის თემფლეითში არსებული ტექსტის ზომა.
+- ახალ დაემითებულ ზომას `App` ივენთ ბაინდინგის საშუალებით დააფიქსირებს და შეცვლის თავის
+  ფროფერთის `fontSizePx`, რათა მან ეს ახალი მნიშვნელობა მიიღოს.
+- შედეგად იცვლება `App`-ის თემფლეითში არსებული ტექსტის ზომა.
 
 ამ ბაინდინგის შესამოკლებლად ანგულარში შექმნეს შემდეგნაირი სინტაქსი:
 
@@ -110,8 +107,8 @@ fontSizePx = 16;
 
 two way binding-ით ჩვენ ანგულარს ერთდროულად ვეუბნებით, რომ:
 
-- size თვისებამ `SizerComponent`-ში ის მნიშვნელობა უნდა მიიღოს, რაც `fontSizePx`-ს აქვს.
-- `fontSizePx`-მა `AppComponent`-ში ის მნიშვნელობა უნდა მიიღოს, რასაც `sizeChange` ივენთი დააემითებს.
+- size თვისებამ `Sizer`-ში ის მნიშვნელობა უნდა მიიღოს, რაც `fontSizePx`-ს აქვს.
+- `fontSizePx`-მა `App`-ში ის მნიშვნელობა უნდა მიიღოს, რასაც `sizeChange` ივენთი დააემითებს.
 
 ## შეჯამება
 
@@ -120,4 +117,4 @@ two way binding-ით ჩვენ ანგულარს ერთდრო�
 two way binding იშვიათად გამოიყენება, თუმცა მისი საჭიროება შედარებით უფრო ხშირად ფორმების შემთხვევაში ჩნდება.
 ამისთვის ანგულარში არსებობს `ngModel` დირექტივი, რომელიც two way binding-ით გამოიყენება.
 მის შესახებ ინფორმაცია ხელმისაწვდიომია
-[ოფიციალურ დოკუმენტაციაში](https://angular.io/guide/built-in-directives#displaying-and-updating-properties-with-ngmodel).
+[ოფიციალურ დოკუმენტაციაში](https://angular.dev/guide/templates/two-way-binding).

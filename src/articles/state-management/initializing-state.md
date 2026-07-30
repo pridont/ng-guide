@@ -11,7 +11,7 @@ title: "სთეითში მონაცემების ინიცი�
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, of, tap } from "rxjs";
 
 export interface TodoItem {
@@ -26,7 +26,7 @@ export class TodoService {
 
   private todos$ = new BehaviorSubject<TodoItem[]>([]);
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   get todos() {
     return this.todos$.asObservable();
@@ -71,26 +71,24 @@ export class TodoService {
 ეფექტი გამოიწვიოს. ანსუბსქრაიბი აქ არ დაგვჭირდება, რადგან ამას `HttpClient`
 აგვარებს.
 
-ახლა AppComponent-ში გამოვიყენოთ ეს სერვისი:
+ახლა App-ში გამოვიყენოთ ეს სერვისი:
 
 ```ts
-import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { TodoItem, TodoService } from "./todo.service";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  imports: [FormsModule],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
-  todos$ = this.todoService.todos;
+export class App implements OnInit {
+  private todoService = inject(TodoService);
 
-  constructor(private todoService: TodoService) {}
+  todos$ = this.todoService.todos;
 
   ngOnInit(): void {
     this.todoService.init();
@@ -120,18 +118,21 @@ export class AppComponent implements OnInit {
 ```html
 <div class="container" style="max-width: 500px">
   <h1>Your List:</h1>
-  <ul class="list-group" *ngIf="todos$ | async as todos">
-    <p *ngIf="todos.length === 0">Your list will show here...</p>
-    <li
-      class="list-group-item d-flex justify-content-between align-items-center"
-      *ngFor="let item of todos"
-    >
-      <div class="d-flex align-items-center">
-        <input type="checkbox" [checked]="item.done" />
-        <span class="ms-2">{{ item.title }}</span>
-      </div>
-    </li>
-  </ul>
+  @if (todos$ | async; as todos) {
+    <ul class="list-group">
+      @if (todos.length === 0) {
+        <p>Your list will show here...</p>
+      }
+      @for (item of todos; track item.id) {
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <input type="checkbox" [checked]="item.done" />
+            <span class="ms-2">{{ item.title }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
 </div>
 ```
 

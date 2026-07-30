@@ -18,7 +18,7 @@ title: "ინტერპოლაცია და მოვლენები�
 title და count:
 
 ```ts
-export class AppComponent {
+export class App {
   title = "Hello there";
   count = 0;
 }
@@ -59,7 +59,7 @@ export class AppComponent {
 შევქმნათ ეს მეთოდი:
 
 ```ts
-export class AppComponent {
+export class App {
   title = "Hello there";
   count = 0;
 

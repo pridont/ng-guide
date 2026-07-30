@@ -6,24 +6,24 @@ title: "Child Routing"
 
 მისამართის ცვლილება არ ხდება მხოლოდ ზედა დონეზე. არის შემთხვევები, როცა
 გვინდა კონკრეტული მისამართის შიგნით ნავიგაცია. აქ, წინასწარ გამზადებულ
-აპლიკაციაში გვაქვს ორი კომპონენტი: `FirstComponent` `LastComponent` და
+აპლიკაციაში გვაქვს ორი კომპონენტი: `First` `Last` და
 ისინი სათანადო მისამართებზე იტვირთება, როგორც ეს როუთინგის კონფიგურაციაშია:
 
 app.routes.ts-ში:
 
 ```ts
 import { Routes } from "@angular/router";
-import { FirstComponent } from "./first/first.component";
-import { SecondComponent } from "./second/second.component";
+import { First } from "./first/first";
+import { Second } from "./second/second";
 
 export const routes: Routes = [
-  { path: "first", component: FirstComponent },
-  { path: "second", component: SecondComponent },
+  { path: "first", component: First },
+  { path: "second", component: Second },
   { path: "", redirectTo: "first", pathMatch: "full" },
 ];
 ```
 
-`router-outlet` გვაქვს განთავსებული `AppComponent`-ში.
+`router-outlet` გვაქვს განთავსებული `App`-ში.
 აქვე გვაქვს ჰედერი, საიდანაც ვაკეთებთ ნავიგაციას:
 
 ```html
@@ -41,7 +41,7 @@ export const routes: Routes = [
 > **შენიშვნა:** არ დაგავიწყდეთ კომპონენტში `RouterModule`-ის შემოტანა.
 
 ახლა ვთქვათ გვინდა, რომ Second კომპონენტის შიგნით შევძლოთ კიდევ სხვადასხვა კომპონენტზე
-ნავიგაცია. შევქმნათ ორი კომპონენტი `SecondComponent`-ის შიგნით.
+ნავიგაცია. შევქმნათ ორი კომპონენტი `Second`-ის შიგნით.
 
 ```sh
 ng g c second/child-one
@@ -56,19 +56,19 @@ ng g c second/child-two
 
 ```ts
 import { Routes } from "@angular/router";
-import { FirstComponent } from "./first/first.component";
-import { ChildOneComponent } from "./second/child-one/child-one.component";
-import { ChildTwoComponent } from "./second/child-two/child-two.component";
-import { SecondComponent } from "./second/second.component";
+import { First } from "./first/first";
+import { ChildOne } from "./second/child-one/child-one";
+import { ChildTwo } from "./second/child-two/child-two";
+import { Second } from "./second/second";
 
 export const routes: Routes = [
-  { path: "first", component: FirstComponent },
+  { path: "first", component: First },
   {
     path: "second",
-    component: SecondComponent,
+    component: Second,
     children: [
-      { path: "child-one", component: ChildOneComponent },
-      { path: "child-two", component: ChildTwoComponent },
+      { path: "child-one", component: ChildOne },
+      { path: "child-two", component: ChildTwo },
     ],
   },
   { path: "", redirectTo: "first", pathMatch: "full" },
@@ -82,7 +82,7 @@ export const routes: Routes = [
 იმას ვწერთმ და არა პირდაპირ `second/child-one`-ს, თუმცა ბრაუზერის მისამართში
 ეს სწორედ ასე იქნება.
 
-ახლა `SecondComponent`-ში შევქმნათ ნავიგაციის ლინკები და, რა თქმა უნდა,
+ახლა `Second`-ში შევქმნათ ნავიგაციის ლინკები და, რა თქმა უნდა,
 `router-outlet`.
 
 ```html
@@ -110,8 +110,8 @@ export const routes: Routes = [
 ჩვენ შეგვიძლია მთლიანი რაუთების კონფიგურაცია ჩავტვირთოთ ზარმაცად.
 წარმოვიდგინოთ რომ პროექტში გვაქვს ფოლდერი `admin` სადაც ინახება
 ადმინისტრატორის გვერდის კომპონენტები. ესენია:
-`admin-home.component.ts`, სადაც ადმინისტრატორის მთავარი გვერდია
-(`/admin/home`) და `admin-users.component.ts`, სადაც ადმინისტრატორი
+`admin-home.ts`, სადაც ადმინისტრატორის მთავარი გვერდია
+(`/admin/home`) და `admin-users.ts`, სადაც ადმინისტრატორი
 მომხმარებლებს მართავს (`/admin/users`). ამავე ფოლდერში შეიძლება
 გვქონდეს რაუთების კონფიგურაცია:
 
@@ -119,8 +119,8 @@ export const routes: Routes = [
 // admin/admin.routes.ts
 
 export const ADMIN_ROUTES: Route[] = [
-  { path: "home", component: AdminHomeComponent },
-  { path: "users", component: AdminUsersComponent },
+  { path: "home", component: AdminHome },
+  { path: "users", component: AdminUsers },
   // ...
 ];
 ```
@@ -146,7 +146,7 @@ export const routes: Route[] = [
 
 ზოგჯერ შეიძლება დაგვჭირდეს თვითონ პროექტის ცალკეული გვერდების მოდულებად
 ორგანიზება, სადაც ამ კომპონენტებს თავიანთი routing მოდული ექნებათ.
-ვთქვათ `SecondComponent` იმდენად გაიზარდა, რომ მას ცალკე უნდა მენეჯმენტი,
+ვთქვათ `Second` იმდენად გაიზარდა, რომ მას ცალკე უნდა მენეჯმენტი,
 როგორც მთლიან მოდულს. აქ ასევე შეგვიძლია ამ მთლიანი მოდულის მხოლოდ
 მაშინ ჩატვირთვა, როცა მომხმარებელი ამ მოდულისთვის საჭირო გვერდზე იქნება.
 
@@ -157,17 +157,17 @@ second-routing.module.ts:
 ```ts
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
-import { ChildOneComponent } from "./child-one/child-one.component";
-import { SecondComponent } from "./second.component";
-import { ChildTwoComponent } from "./child-two/child-two.component";
+import { ChildOne } from "./child-one/child-one";
+import { Second } from "./second";
+import { ChildTwo } from "./child-two/child-two";
 
 const routes: Routes = [
   {
     path: "",
-    component: SecondComponent,
+    component: Second,
     children: [
-      { path: "child-one", component: ChildOneComponent },
-      { path: "child-two", component: ChildTwoComponent },
+      { path: "child-one", component: ChildOne },
+      { path: "child-two", component: ChildTwo },
     ],
   },
 ];
@@ -180,7 +180,7 @@ export class SecondRoutingModule {}
 ```
 
 რადგან ჩვენთვის `second` იქნება ახალი მოდული, მისი მთავარი გვერდი
-უნდა იტოს `SecondComponent` და მათი შვილები იქნებიან ჩვენი შექმნილი
+უნდა იტოს `Second` და მათი შვილები იქნებიან ჩვენი შექმნილი
 ორი კომპონენტი.
 
 ახლა `RouterModule`-ზე ვიყენებთ `forChild` მეთოდს, რადგან ეს
@@ -191,13 +191,13 @@ second.module.ts
 
 ```ts
 import { NgModule } from "@angular/core";
-import { ChildOneComponent } from "./child-one/child-one.component";
-import { ChildTwoComponent } from "./child-two/child-two.component";
+import { ChildOne } from "./child-one/child-one";
+import { ChildTwo } from "./child-two/child-two";
 import { SecondRoutingModule } from "./second-routing.module";
-import { SecondComponent } from "./second.component";
+import { Second } from "./second";
 
 @NgModule({
-  declarations: [SecondComponent, ChildOneComponent, ChildTwoComponent],
+  declarations: [Second, ChildOne, ChildTwo],
   imports: [SecondRoutingModule],
 })
 export class SecondModule {}
@@ -216,14 +216,14 @@ import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
 
 import { AppRoutingModule } from "./app-routing.module";
-import { AppComponent } from "./app.component";
-import { FirstComponent } from "./first/first.component";
+import { App } from "./app";
+import { First } from "./first/first";
 
 @NgModule({
-  declarations: [AppComponent, FirstComponent],
+  declarations: [App, First],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
-  bootstrap: [AppComponent],
+  bootstrap: [App],
 })
 export class AppModule {}
 ```
@@ -234,10 +234,10 @@ export class AppModule {}
 ```ts
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
-import { FirstComponent } from "./first/first.component";
+import { First } from "./first/first";
 
 const routes: Routes = [
-  { path: "first", component: FirstComponent },
+  { path: "first", component: First },
   {
     path: "second",
     loadChildren: () =>

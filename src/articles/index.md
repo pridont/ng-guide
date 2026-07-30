@@ -33,9 +33,8 @@ title: "ანგულარის ქართული გზამკვლ�
 
 წიგნი შექმნილია [ფრიდონ თეთრაძის](https://pridontetradze.com) მიერ.
 
-ამ საიტის მასალა ეყრდნობა ანგულარის ოფიციალურ დოკუმენტაციებს:
+ამ საიტის მასალა ეყრდნობა ანგულარის ოფიციალურ დოკუმენტაციას:
 
-- [angular.io](https://angular.io)
 - [angular.dev](https://angular.dev)
 
 <div style="text-align: center; margin-top: 100px;">

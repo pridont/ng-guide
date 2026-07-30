@@ -80,7 +80,7 @@ export class AppModule { }
 }
 ```
 
-შემდგომ `app.component.html`-ში დავიწყოთ ცვლილებების შეტანა:
+შემდგომ `app.html`-ში დავიწყოთ ცვლილებების შეტანა:
 
 ```html
 <h1>{{"page_header" | translate }}</h1>
@@ -92,12 +92,15 @@ export class AppModule { }
 ```
 როგორც ვხედავთ, თიმფლეითში იდენტიფიკატორად გაგვაქვს ის სტრინგები, რომლებსაც თვისებებად ვინახავთ ლოკალის `json`-ში, ამ იდენტიფიკატორს
 ვატარებთ `translate` ფაიფში, რომელიც შედგომ გვიბრუნებს თარგმანს. ეს ფაიფი მოდის `TranslateModule`-დან.
-ვიზუალის დამატების შემდგომ დავიწყოთ `app.component.ts` მოდიფიცირება:
+ვიზუალის დამატების შემდგომ დავიწყოთ `app.ts` მოდიფიცირება:
 
 ```ts
+import { inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 ...
-constructor(private translateService: TranslateService) {
+private translateService = inject(TranslateService);
+
+constructor() {
   this.initLanguage();
 }
 

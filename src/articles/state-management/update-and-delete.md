@@ -94,32 +94,31 @@ PATCH მოთხოვნას ამ ნივთის აიდის მ�
 
 წაშლის შემთხვევაში პირდაპირ აიდის მივიღებთ პარამეტრში, რომელსაც მეთოდს გავატანთ.
 
-სადაც თითოეულ ნივთს ვარენდერებთ `NgFor` დირექტივით, შემდეგი ცვლილებები შეგვაქვს:
+სადაც თითოეულ ნივთს ვარენდერებთ `@for` ბლოკით, შემდეგი ცვლილებები შეგვაქვს:
 
 ```html
-<li
-  class="list-group-item d-flex justify-content-between align-items-center"
-  *ngFor="let item of vm.todos"
->
-  <div class="d-flex align-items-center">
-    <input type="checkbox" [checked]="item.done" (click)="changeDone(item)" />
-    <span class="ms-2">{{ item.title }}</span>
-  </div>
-  <button class="btn btn-danger" (click)="deleteItem(item.id)">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      fill="currentColor"
-      class="bi bi-trash3-fill"
-      viewBox="0 0 16 16"
-    >
-      <path
-        d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"
-      />
-    </svg>
-  </button>
-</li>
+@for (item of vm.todos; track item.id) {
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <input type="checkbox" [checked]="item.done" (click)="changeDone(item)" />
+      <span class="ms-2">{{ item.title }}</span>
+    </div>
+    <button class="btn btn-danger" (click)="deleteItem(item.id)">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-trash3-fill"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M11 1.5v1h3.5a.5.5 0 0 1 0 1h-.538l-.853 10.66A2 2 0 0 1 11.115 16h-6.23a2 2 0 0 1-1.994-1.84L2.038 3.5H1.5a.5.5 0 0 1 0-1H5v-1A1.5 1.5 0 0 1 6.5 0h3A1.5 1.5 0 0 1 11 1.5Zm-5 0v1h4v-1a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5ZM4.5 5.029l.5 8.5a.5.5 0 1 0 .998-.06l-.5-8.5a.5.5 0 1 0-.998.06Zm6.53-.528a.5.5 0 0 0-.528.47l-.5 8.5a.5.5 0 0 0 .998.058l.5-8.5a.5.5 0 0 0-.47-.528ZM8 4.5a.5.5 0 0 0-.5.5v8.5a.5.5 0 0 0 1 0V5a.5.5 0 0 0-.5-.5Z"
+        />
+      </svg>
+    </button>
+  </li>
+}
 ```
 
 `input`-ზე ვამატებთ დაკლიკების ივენთ ბაინდინგს, რომელსაც ვაკავშირებთ `changeItemDone`

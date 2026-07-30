@@ -19,7 +19,7 @@ import {
   HttpErrorResponse,
   HttpHeaders,
 } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { BehaviorSubject, catchError, of, tap } from "rxjs";
 
 export interface TodoItem {
@@ -36,7 +36,7 @@ export class TodoService {
   private todosLoading$ = new BehaviorSubject<boolean>(false);
   private error$ = new BehaviorSubject<HttpErrorResponse | null>(null);
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
 
   get error() {
     return (
@@ -141,7 +141,7 @@ export class TodoService {
 შემთხვევაში სანაცვლოდ დავვაბრუნოთ ახალი სტრიმი, მაგალითად HTTP მოთხოვნა ალტერნატიულ
 ენდფოინთზე, თუმცა ჩვენ ეს არ გვჭირდება.
 
-ახლა შეგვიძლია ეს ყელაფერი თემფლეითში გავიტანოთ. `AppComponent`-ში შევქმნათ
+ახლა შეგვიძლია ეს ყელაფერი თემფლეითში გავიტანოთ. `App`-ში შევქმნათ
 `loading$` და `error$` თვისებები, სადაც სათანადო სერვისის სტრიმებს შევინახავთ.
 თემფლეითში რომ ისინი პირდაპირ გავიტანოთ, მოგვიწევს ბევრგან `async` ფაიფის გამოყენება.
 ეს ყოველთვის პრობლემური არ არის, მაგრამ ხშირად გავრცელებული პრაქტიკაა ისეთი
@@ -149,21 +149,21 @@ export class TodoService {
 ამ უკანასკნელზე დასუბსქრაიბება.
 
 ```ts
-import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { combineLatest, map } from "rxjs";
 import { TodoItem, TodoService } from "./todo.service";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  imports: [FormsModule],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
+  private todoService = inject(TodoService);
+
   newItemTitle = "";
 
   todos$ = this.todoService.todos;
@@ -173,8 +173,6 @@ export class AppComponent implements OnInit {
   vm$ = combineLatest([this.todos$, this.loading$, this.error$]).pipe(
     map(([todos, loading, error]) => ({ todos, loading, error }))
   );
-
-  constructor(private todoService: TodoService) {}
 
   ngOnInit(): void {
     this.todoService.init();
@@ -208,7 +206,8 @@ export class AppComponent implements OnInit {
 ახლა თემფლეითში ყველაზე ზედა დონის კონტეინერზე ვასუბსქრაიბებთ მხოლოდ ამ `vm$` სტრიმზე:
 
 ```html
-<div *ngIf="vm$ | async as vm" class="container" style="max-width: 500px">
+@if (vm$ | async; as vm) {
+<div class="container" style="max-width: 500px">
   <h1>Your List:</h1>
   <div class="row mb-2 gap-2 p-2">
     <input
@@ -222,34 +221,37 @@ export class AppComponent implements OnInit {
       [disabled]="!newItemTitle"
       (click)="addItem()"
     >
-      <span *ngIf="!vm.loading">Add</span>
-      <div
-        class="spinner-border spinner-border-sm"
-        role="status"
-        *ngIf="vm.loading"
-      >
-        <span class="visually-hidden">Loading...</span>
-      </div>
+      @if (!vm.loading) {
+        <span>Add</span>
+      } @else {
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      }
     </button>
   </div>
   <ul class="list-group">
-    <div class="card text-bg-danger" *ngIf="vm.error">
-      <div class="card-body">
-        <p>Error: {{ vm.error.message }}</p>
+    @if (vm.error) {
+      <div class="card text-bg-danger">
+        <div class="card-body">
+          <p>Error: {{ vm.error.message }}</p>
+        </div>
       </div>
-    </div>
-    <p *ngIf="vm.todos.length === 0">Your list will show here...</p>
-    <li
-      class="list-group-item d-flex justify-content-between align-items-center"
-      *ngFor="let item of vm.todos"
-    >
-      <div class="d-flex align-items-center">
-        <input type="checkbox" [checked]="item.done" />
-        <span class="ms-2">{{ item.title }}</span>
-      </div>
-    </li>
+    }
+    @if (vm.todos.length === 0) {
+      <p>Your list will show here...</p>
+    }
+    @for (item of vm.todos; track item.id) {
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <input type="checkbox" [checked]="item.done" />
+          <span class="ms-2">{{ item.title }}</span>
+        </div>
+      </li>
+    }
   </ul>
 </div>
+}
 ```
 
 შედეგს ვინახავთ როგორც `vm` ობიექტს, და ამ ობიექტიდან ვიღებთ სათანადო თვისებებს:

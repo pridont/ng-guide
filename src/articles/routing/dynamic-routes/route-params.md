@@ -10,18 +10,18 @@ title: "Route Params"
 ამ მაგალითში სწორედ ასეთ სცენარს განვიხილავთ.
 
 წინასწარ გვაქვს გამზადებული აპლიკაცია როუთინგით.
-app.component.html-ში გვაქვს `router-outlet`.
+app.html-ში გვაქვს `router-outlet`.
 
 `app.routes.ts`-ში გვაქვს ასეთი კონფიგურაცია:
 
 ```ts
 import { Routes } from "@angular/router";
-import { ProductDetailsComponent } from "./product-details/product-details.component";
-import { ProductsComponent } from "./products/products.component";
+import { ProductDetails } from "./product-details/product-details";
+import { Products } from "./products/products";
 
 export const routes: Routes = [
-  { path: "products", component: ProductsComponent },
-  { path: "products/:id", component: ProductDetailsComponent },
+  { path: "products", component: Products },
+  { path: "products/:id", component: ProductDetails },
   { path: "", redirectTo: "products", pathMatch: "full" },
 ];
 ```
@@ -102,44 +102,41 @@ export class ProductsService {
 მხოლოდ ერთი პროდუქტი აიდის მიხედვით.
 
 ამ სერვისს იყენებს ჩვენი ორი კომპონენტი.
-ProductsComponent უბრალოდ იღებს ამ პროდუქტების მასივს და
+Products უბრალოდ იღებს ამ პროდუქტების მასივს და
 თემფლეითში განათავსებს:
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { ProductsService } from "../products.service";
 import { RouterLink } from "@angular/router";
 
 @Component({
   selector: "app-products",
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: "./products.component.html",
-  styleUrls: ["./products.component.css"],
+  imports: [RouterLink],
+  templateUrl: "./products.html",
+  styleUrl: "./products.css",
 })
-export class ProductsComponent {
-  constructor(public productsService: ProductsService) {}
+export class Products {
+  productsService = inject(ProductsService);
 }
 ```
 
 ```html
 <div class="container">
   <ul>
-    <li
-      class="product"
-      *ngFor="let product of productsService.getAllProducts()"
-    >
-      <h3>{{ product.name }}</h3>
-      <img [src]="product.image" [alt]="product.name" />
-      <p>{{ product.price | currency }}</p>
-      <a routerLink="/products/{{ product.id }}">Details</a>
-    </li>
+    @for (product of productsService.getAllProducts(); track product.id) {
+      <li class="product">
+        <h3>{{ product.name }}</h3>
+        <img [src]="product.image" [alt]="product.name" />
+        <p>{{ product.price | currency }}</p>
+        <a routerLink="/products/{{ product.id }}">Details</a>
+      </li>
+    }
   </ul>
 </div>
 ```
 
-ჩვენ უბრალოდ `NgFor` დირექტივით განვათავსებთ სერვისიდან აღებულ
+ჩვენ უბრალოდ `@for` ბლოკით განვათავსებთ სერვისიდან აღებულ
 პროდუქტებს და ასევე მათთვის ვქმნით სანავიგაციო ლინკებს `routerLink`-ით
 (კომპონენტში საჭიროა `RouterLink` დირექტივის დაიმპორტება).
 თითოეული პროდუქტის ლინკს ექნება ექნება თავისი აიდი, path-ის იმ ადგილას,
@@ -151,26 +148,23 @@ export class ProductsComponent {
 კონკრეტული პროდუქტი.
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Product } from "../product.model";
 import { ProductsService } from "../products.service";
 
 @Component({
   selector: "app-product-details",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./product-details.component.html",
-  styleUrls: ["./product-details.component.css"],
+  templateUrl: "./product-details.html",
+  styleUrl: "./product-details.css",
 })
-export class ProductDetailsComponent {
-  product!: Product;
+export class ProductDetails {
+  private productsService = inject(ProductsService);
+  private route = inject(ActivatedRoute);
 
-  constructor(
-    private productsService: ProductsService,
-    private route: ActivatedRoute
-  ) {
+  product: Product | null = null;
+
+  constructor() {
     this.route.params.subscribe((params) => {
       const product = this.productsService.getProductById(+params["id"]);
       if (product) {
@@ -181,10 +175,10 @@ export class ProductDetailsComponent {
 }
 ```
 
-ჩვენ პროდუქტს შევინახავთ `product` ცვლადში. კონსტრუქტორში
-`ProductsService`-ის გარდა ვაინჯექთებთ `ActivatedRoute`, სწორედ მისი დახმარებით
-ვიღებთ ინფორმაციას აქტიურ როუთზე კონსტრუქტორის სხეულშივე აღვწერთ მონაცემების
-აღების ლოგიკას. კონსტრუქტორში ჩაწერილი ლოგიკა აქტიურდება კომპონენტის ინიციალიზაციისას.
+ჩვენ პროდუქტს შევინახავთ `product` ცვლადში.
+`ProductsService`-ის გარდა ვაინჯექთებთ `ActivatedRoute`-ს, სწორედ მისი დახმარებით
+ვიღებთ ინფორმაციას აქტიურ როუთზე. მონაცემების აღების ლოგიკას კონსტრუქტორში
+აღვწერთ — იქ ჩაწერილი ლოგიკა აქტიურდება კომპონენტის ინიციალიზაციისას.
 
 ჩვენ გვაინტერესებს `params` თვისება, რომელიც აბრუნებს observable-ს, შესაბამისად
 ჩვენ უნდა დავასუბსქრაიბოთ მასზე. ქოლბექში ვიღებთ პარამეტრებს. ავიღოთ
@@ -197,15 +191,18 @@ observable-ში ახალ მნიშვნელობას გასც
 ```html
 <div class="container">
   <a routerLink="/products">Back to products</a>
-  <div *ngIf="product">
-    <h1>{{ product.name }}</h1>
-    <img [src]="product.image" [alt]="product.name" />
-    <h3>{{ product.price | currency }}</h3>
-    <p>{{ product.description }}</p>
-  </div>
-  <div *ngIf="!product">
-    <h1>Error, product not found.</h1>
-  </div>
+  @if (product) {
+    <div>
+      <h1>{{ product.name }}</h1>
+      <img [src]="product.image" [alt]="product.name" />
+      <h3>{{ product.price | currency }}</h3>
+      <p>{{ product.description }}</p>
+    </div>
+  } @else {
+    <div>
+      <h1>Error, product not found.</h1>
+    </div>
+  }
 </div>
 ```
 
@@ -215,13 +212,12 @@ observable-ში ახალ მნიშვნელობას გასც
 ასე აპლიკაცია ხელმძღვანელობს როუთის პარამეტრებით. აქვე რადგან კლასში
 საბსქრიფშენს ვიყენებთ, ჯობია თუკი მას გავაუქმებთ, როცა კომპონენტი განადგურდება.
 ამისთვის შეგვიძლია გამოვიყენოთ
-[`takeUntilDestroyed`](https://angular.io/api/core/rxjs-interop/takeUntilDestroyed)
+[`takeUntilDestroyed`](https://angular.dev/api/core/rxjs-interop/takeUntilDestroyed)
 ოპერატორი, რომელსაც
 `@angular/core/rxjs-interop` გვთავაზობს.
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { Product } from "../product.model";
 import { ProductsService } from "../products.service";
@@ -229,18 +225,16 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 @Component({
   selector: "app-product-details",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./product-details.component.html",
-  styleUrls: ["./product-details.component.css"],
+  templateUrl: "./product-details.html",
+  styleUrl: "./product-details.css",
 })
-export class ProductDetailsComponent {
+export class ProductDetails {
+  private productsService = inject(ProductsService);
+  private route = inject(ActivatedRoute);
+
   product!: Product;
 
-  constructor(
-    private productsService: ProductsService,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     this.route.params.pipe(takeUntilDestroyed()).subscribe((params) => {
       const product = this.productsService.getProductById(+params["id"]);
       if (product) {

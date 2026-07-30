@@ -48,34 +48,34 @@ unit ტესტების ჩატარება შესაძლებ�
 `spec` იმიტომ, რომ ტესტის ფაილი ასევე ერთგვარი სპეციფიკაციის ფაილია. ანუ
 ასეთ ფაილებში აღვწერთ როგორ უნდა მუშაობდეს კომპონენტი.
 
-შევხედოთ ანგულარის CLI-ით შექმნილ აპლიკაციაში წინასწარ გამზადებულ `app.component.spec.ts`
+შევხედოთ ანგულარის CLI-ით შექმნილ აპლიკაციაში წინასწარ გამზადებულ `app.spec.ts`
 ფაილს.
 
 ```ts
 import { TestBed } from "@angular/core/testing";
-import { AppComponent } from "./app.component";
+import { App } from "./app";
 
-describe("AppComponent", () => {
+describe("App", () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AppComponent],
+      declarations: [App],
     }).compileComponents();
   });
 
   it("should create the app", () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
   it(`should have as title 'tests'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(App);
     const app = fixture.componentInstance;
     expect(app.title).toEqual("tests");
   });
 
   it("should render title", () => {
-    const fixture = TestBed.createComponent(AppComponent);
+    const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector(".content span")?.textContent).toContain(
@@ -86,10 +86,10 @@ describe("AppComponent", () => {
 ```
 
 აქ გვაქვს ერთი დიდი `describe` ფუნქცია. ეს ფუნქცია თავს უყრის ერთი კონკრეტული
-კოდის მონაკვეთისთვის განკუთვნილ ტესტებს, ამ შემთხვევაში `AppComponent`-ისთვის.
+კოდის მონაკვეთისთვის განკუთვნილ ტესტებს, ამ შემთხვევაში `App`-ისთვის.
 პირველ არგუმენტად ამ ფუნქციას ვაწვდით სტრინგს, რასაც შეიძლება ჰქონდეს ნებისმიერი
 მნიშვნელობა. როცა Karma-ს გავხსნით, ამ `describe`-ში არსებული ტესტების ბლოკი
-ერთად იქნება შეკრული `AppComponent` სახელის ქვეშ. `describe`-ის ქოლბექში ვწერთ
+ერთად იქნება შეკრული `App` სახელის ქვეშ. `describe`-ის ქოლბექში ვწერთ
 ამ ცალკეულ ტესტებს `it` ფუნქციებით.
 
 `it` ფუნქციებში აღვწერთ კომპონენტის შესახებ კონკრეტულ მოლოდინებს, ანუ რას
@@ -133,7 +133,7 @@ npm run test
 
 ```ts
 it("should change title with new value", () => {
-  const fixture = TestBed.createComponent(AppComponent);
+  const fixture = TestBed.createComponent(App);
   const app = fixture.componentInstance;
   app.changeTitle();
   expect(app.title).toEqual("changed");
@@ -151,10 +151,10 @@ import { Component } from "@angular/core";
 
 @Component({
   selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   title = "tests";
 
   changeTitle() {
@@ -172,5 +172,5 @@ export class AppComponent {
 და ჩვენ მხოლოდ ზედაპირულად გავეცანით მის პრაქტიკას. მის შესახებ მეტის გასაგებად შეგიძლიათ
 გაეცნოთ შემდეგ რესურსებს:
 
-- [angular.io/guide/testing](https://angular.io/guide/testing)
+- [angular.dev/guide/testing](https://angular.dev/guide/testing)
 - [testing-angular.com](https://testing-angular.com/)

@@ -23,7 +23,6 @@ import { Directive } from "@angular/core";
 
 @Directive({
   selector: "[appHighlight]",
-  standalone: true,
 })
 export class HighlightDirective {
   constructor() {}
@@ -41,22 +40,21 @@ export class HighlightDirective {
 ```
 
 ყველაზე ხშირად ანგულარში ასეთი დირექტივის სელექტორს ვხვდებით. სხვა ტიპის სელექტორების შესახებ
-ინფორმაცია იხილეთ [ანგულარის დოკუმენტაციაში](https://angular.io/api/core/Directive#selector).
+ინფორმაცია იხილეთ [ანგულარის დოკუმენტაციაში](https://angular.dev/api/core/Directive#selector).
 სელექტორი იმავე პრინციპით მუშაობს, როგორც CSS-ის სელექტორი ან ჯავასკრიპტში `document.querySelector`.
 
 ჩვენი დირექტივის კლასში შემდეგი მოდიფიკაციები შეგვაქვს:
 
 ```ts
-import { Directive, ElementRef, HostListener, Input } from "@angular/core";
+import { Directive, ElementRef, HostListener, inject, Input } from "@angular/core";
 
 @Directive({
   selector: "[appHighlight]",
-  standalone: true,
 })
 export class HighlightDirective {
   @Input() highlightColor: "blue" | "green" | "yellow" = "yellow";
 
-  constructor(private elementRef: ElementRef) {}
+  private elementRef = inject(ElementRef);
 
   @HostListener("mouseover")
   onMouseOver() {
@@ -85,20 +83,18 @@ export class HighlightDirective {
 ხოლო როცა მაუსი მის არეალს დატოვებს, ფერი საწყის მდგომარეობას დაუბრუნდება.
 
 `HilightDirective` არის standalone ტიპის დირექტივი, რაც იმას ნიშნავს, რომ მის გამოსაყენებლად საჭიროა
-ამ კლასის დამატება კომპონენტის იმპორტების სიაში. ჩვენ ამ დირექტივს `AppComponent`-ში ვიყენებთ.
+ამ კლასის დამატება კომპონენტის იმპორტების სიაში. ჩვენ ამ დირექტივს `App`-ში ვიყენებთ.
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { HighlightDirective } from "./highlight.directive";
 
 @Component({
   // ...
-  standalone: true,
-  imports: [CommonModule, HighlightDirective],
+  imports: [HighlightDirective],
   // ...
 })
-export class AppComponent {}
+export class App {}
 ```
 
 ყველა კომპონენტში, სადაც ამ დირექტივის გამოყენება დაგვჭირდება, მისი ასეთი პრინციპით დაიმპორტება იქნება საჭირო.
@@ -114,7 +110,7 @@ export class AppComponent {}
 ახლა პირველ ორ სათაურს ფერი უნდა ეცვლებოდეს. ყურადღება მიაქციეთ, რომ `highlightColor` თვისებაზე
 ჩვენ ოთკუთხედი ფრჩხილები არ გამოვიყენეთ. ასე `highlightColor` თვისება დირექტივის კლასში იღებს პირდაპირ
 სტრინგის ტიპის მნიშვნელობას. ოთხკუთხედი ფრჩხილებით `blue` არა სტრინგი, არამედ ცვლადის სახელი იქნებოდა,
-როგორც ჯავასკრიპტის ექსპფრეშენი, ამისთვის სათანადო სახელის თვისება უნდა არსებობდეს `AppComponent`-ის კლასში.
+როგორც ჯავასკრიპტის ექსპფრეშენი, ამისთვის სათანადო სახელის თვისება უნდა არსებობდეს `App`-ის კლასში.
 
 შესაძლებელია დირექტივში არსებობდეს სელექტორის სახელის მქონე `Input` თვისება:
 

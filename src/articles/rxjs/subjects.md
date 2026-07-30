@@ -22,17 +22,14 @@ unicast, ანუ ცხელი სტრიმები არიან წ�
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Subject } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   mySubject$ = new Subject<string>();
 
   onClick() {
@@ -61,17 +58,14 @@ export class AppComponent {
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Subject } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   mySubject$ = new Subject<string>();
 
   ngOnInit(): void {
@@ -117,17 +111,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { BehaviorSubject } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   mySubject$ = new BehaviorSubject<string>("Initial Value");
 
   ngOnInit(): void {

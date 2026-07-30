@@ -61,13 +61,14 @@ export const appConfig: ApplicationConfig = {
 ჩვებულებრივ ამას ასე გავაკეთებდით:
 
 ```ts
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { ShoppingCart } from "../types/cart.model";
 import { AuthService } from "./auth.service";
 
 @Injectable({ providedIn: "root" })
 export class CartService {
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   getCartsForUser() {
     return this.http.get<{ carts: ShoppingCart[] }>(
@@ -94,16 +95,16 @@ export class CartService {
 
 ```ts
 import { Routes } from "@angular/router";
-import { AuthComponent } from "./auth/auth.component";
-import { LogoutComponent } from "./logout/logout.component";
-import { ShoppingCartComponent } from "./shopping-cart/shopping-cart.component";
+import { Auth } from "./auth/auth";
+import { Logout } from "./logout/logout";
+import { ShoppingCart } from "./shopping-cart/shopping-cart";
 
 export const routes: Routes = [
-  { path: "auth", component: AuthComponent },
-  { path: "logout", component: LogoutComponent },
+  { path: "auth", component: Auth },
+  { path: "logout", component: Logout },
   {
     path: "cart",
-    component: ShoppingCartComponent,
+    component: ShoppingCart,
   },
   { path: "", redirectTo: "cart", pathMatch: "full" },
 ];
@@ -118,7 +119,7 @@ export const routes: Routes = [
 მოხდება ამ კალათის გვერდზე, თუმცა მომხმარებელი რადგან
 ავთენტიფიცირებული არ არის ის შედეგს ვერ დაინახავს.
 
-ასე გამოიყურება ჩვენი `AppComponent`-ის თემფლეითი:
+ასე გამოიყურება ჩვენი `App`-ის თემფლეითი:
 
 ```html
 <header>
@@ -198,7 +199,8 @@ interface LoginResponse {
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-  constructor(private http: HttpClient, private router: Router) {}
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
   login(credentials: { username: string; password: string }) {
     return this.http
@@ -266,28 +268,27 @@ post მოთხოვნით. აქ მესამე არგუმე�
 აიდის აღება ლოკალური მეხსიერებიდან. ეს უკანასკნელი დაგვჭირდება
 სწორი საშოპინგო კალათის მისაღებად.
 
-ახლა `AuthComponent`-ში ეს სერვისი გამოვიყენოთ:
+ახლა `Auth`-ში ეს სერვისი გამოვიყენოთ:
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder, Validators } from "@angular/forms";
 import { AuthService } from "../services/auth.service";
 
 @Component({
   selector: "app-auth",
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./auth.component.html",
-  styleUrls: ["./auth.component.css"],
+  imports: [ReactiveFormsModule],
+  templateUrl: "./auth.html",
+  styleUrl: "./auth.css",
 })
-export class AuthComponent {
+export class Auth {
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+
   loginForm = this.fb.nonNullable.group({
     username: ["", Validators.required],
     password: ["", Validators.required],
   });
-
-  constructor(private fb: FormBuilder, private authService: AuthService) {}
 
   login() {
     if (this.loginForm.valid) {
@@ -327,23 +328,20 @@ export class AuthComponent {
 გადამისამართებულები ვიქნებით მთავარ გვერდზე, რომელიც თავის მხრივ `cart`
 მისამართზე გადაგვიყვანს.
 
-`LogoutComponent`-ს მივხედოთ, რომელზეც მაშინ გადავალთ, როცა `logout`
+`Logout`-ს მივხედოთ, რომელზეც მაშინ გადავალთ, როცა `logout`
 სანავიგაციო ღილაკს დავაჭერთ.
 
 ```ts
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject, OnInit } from "@angular/core";
 import { AuthService } from "../services/auth.service";
 
 @Component({
   selector: "app-logout",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./logout.component.html",
-  styleUrls: ["./logout.component.css"],
+  templateUrl: "./logout.html",
+  styleUrl: "./logout.css",
 })
-export class LogoutComponent implements OnInit {
-  constructor(private authService: AuthService) {}
+export class Logout implements OnInit {
+  private authService = inject(AuthService);
 
   ngOnInit(): void {
     this.authService.logout();
@@ -361,13 +359,14 @@ export class LogoutComponent implements OnInit {
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { ShoppingCart } from "../types/cart.model";
 import { AuthService } from "./auth.service";
 
 @Injectable({ providedIn: "root" })
 export class CartService {
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  private http = inject(HttpClient);
+  private authService = inject(AuthService);
 
   getCartsForUser() {
     return this.http.get<{ carts: ShoppingCart[] }>(
@@ -388,21 +387,18 @@ export class CartService {
 ამ მეთოდს დავუძახებთ `ShoppingCart` კომპონენტში:
 
 ```ts
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject, OnInit } from "@angular/core";
 import { CartService } from "../services/cart.service";
 import { ShoppingCart } from "../types/cart.model";
 
 @Component({
   selector: "app-shopping-cart",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./shopping-cart.component.html",
-  styleUrls: ["./shopping-cart.component.css"],
+  templateUrl: "./shopping-cart.html",
+  styleUrl: "./shopping-cart.css",
 })
-export class ShoppingCartComponent implements OnInit {
+export class ShoppingCart implements OnInit {
   carts: ShoppingCart[] = [];
-  constructor(private cartService: CartService) {}
+  private cartService = inject(CartService);
 
   ngOnInit(): void {
     this.cartService.getCartsForUser().subscribe((response) => {
@@ -417,13 +413,17 @@ export class ShoppingCartComponent implements OnInit {
 განვათავსებთ:
 
 ```html
-<div *ngFor="let cart of carts">
-  <h1>Shopping Cart:</h1>
-  <div *ngFor="let product of cart.products">
-    <h2>{{ product.title }}</h2>
-    <h3>{{ product.price | currency }}</h3>
+@for (cart of carts; track cart.id) {
+  <div>
+    <h1>Shopping Cart:</h1>
+    @for (product of cart.products; track product.id) {
+      <div>
+        <h2>{{ product.title }}</h2>
+        <h3>{{ product.price | currency }}</h3>
+      </div>
+    }
   </div>
-</div>
+}
 ```
 
 დავლუპავთ კალათებზე (რადგან ის მასივშია, ანუ ერთზე მეტი შეიძლება იყოს) და

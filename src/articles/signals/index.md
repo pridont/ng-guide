@@ -55,7 +55,7 @@ count.update((value) => value + 1)
     <p>Is even: {{ isCountEven() }}</p>
   `,
 })
-export class AppComponent {
+export class App {
   count = signal(0);
   isCountEven = computed(() => this.count() % 2 === 0);
 
@@ -82,7 +82,7 @@ export class AppComponent {
 რომ აპლიკაციის სთეითი **არ შეიცვალოს** (გამოთვლილი სიგნალებისგან განსხვავებით).
 
 ```ts
-export class AppComponent {
+export class App {
   count = signal(0);
 
   constructor() {

@@ -43,11 +43,9 @@ interface LoginResponse {
 
 @Injectable({ providedIn: "root" })
 export class AuthService {
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private jwtHelper: JwtHelperService
-  ) {}
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private jwtHelper = inject(JwtHelperService);
 
   login(credentials: { username: string; password: string }) {
     return this.http
@@ -122,17 +120,17 @@ export const canActivateCart: CanActivateFn = (
 
 ```ts
 import { Routes } from "@angular/router";
-import { AuthComponent } from "./auth/auth.component";
-import { LogoutComponent } from "./logout/logout.component";
+import { Auth } from "./auth/auth";
+import { Logout } from "./logout/logout";
 import { canActivateCart } from "./services/auth.service";
-import { ShoppingCartComponent } from "./shopping-cart/shopping-cart.component";
+import { ShoppingCart } from "./shopping-cart/shopping-cart";
 
 export const routes: Routes = [
-  { path: "auth", component: AuthComponent },
-  { path: "logout", component: LogoutComponent },
+  { path: "auth", component: Auth },
+  { path: "logout", component: Logout },
   {
     path: "cart",
-    component: ShoppingCartComponent,
+    component: ShoppingCart,
     canActivate: [canActivateCart],
   },
   { path: "", redirectTo: "cart", pathMatch: "full" },
@@ -159,7 +157,7 @@ export const routes: Routes = [
 მეორე მხრივ დავაბრუნებთ ბულიანს, მისამართი გააქტიურდეს თუ არა.
 
 ```ts
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import {
   ActivatedRouteSnapshot,
   CanActivate,
@@ -173,7 +171,8 @@ import { AuthService } from "../services/auth.service";
   providedIn: "root",
 })
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     if (this.authService.isTokenExpired()) {
@@ -190,17 +189,17 @@ export class AuthGuard implements CanActivate {
 
 ```ts
 import { Routes } from "@angular/router";
-import { AuthComponent } from "./auth/auth.component";
+import { Auth } from "./auth/auth";
 import { AuthGuard } from "./guards/auth.guard";
-import { LogoutComponent } from "./logout/logout.component";
-import { ShoppingCartComponent } from "./shopping-cart/shopping-cart.component";
+import { Logout } from "./logout/logout";
+import { ShoppingCart } from "./shopping-cart/shopping-cart";
 
 export const routes: Routes = [
-  { path: "auth", component: AuthComponent },
-  { path: "logout", component: LogoutComponent },
+  { path: "auth", component: Auth },
+  { path: "logout", component: Logout },
   {
     path: "cart",
-    component: ShoppingCartComponent,
+    component: ShoppingCart,
     canActivate: [AuthGuard],
   },
   { path: "", redirectTo: "cart", pathMatch: "full" },

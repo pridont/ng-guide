@@ -58,25 +58,23 @@ title: "სთეითში მონაცემების დამატ�
 და მას შეყვანილ ტექსტს გავატანთ. ამის შემდეგ ტექსტს ვაცარიელებთ.
 
 ```ts
-import { ChangeDetectionStrategy, Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { ChangeDetectionStrategy, Component, inject, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { TodoItem, TodoService } from "./todo.service";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  imports: [FormsModule],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
+  private todoService = inject(TodoService);
+
   newItemTitle = "";
 
   todos$ = this.todoService.todos;
-
-  constructor(private todoService: TodoService) {}
 
   ngOnInit(): void {
     this.todoService.init();

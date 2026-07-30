@@ -12,13 +12,10 @@ title: "Property & Attribute Binding"
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
+  templateUrl: "./app.html",
   styles: `
     div {
       transition: background 500ms ease;
@@ -36,9 +33,9 @@ import { CommonModule } from "@angular/common";
   `,
   ,
 })
-export class AppComponent {
+export class App {
   imgData = {
-    src: "https://angular.io/assets/images/logos/angular/angular.svg",
+    src: "https://angular.dev/assets/images/press-kit/angular_wordmark_gradient.png",
     alt: "Angular Logo",
   };
   btnDisabled = true;

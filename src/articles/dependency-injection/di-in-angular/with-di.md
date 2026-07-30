@@ -11,18 +11,16 @@ title: "DI-ის გამოყენებით"
 სერვისებს, რაც ჩვენი გმირების შესახებ ინფორმაციასთან დაკავშირებულ ლოგიკას
 ერთ ადგილას მოუყრის თავს, ხოლო მის გამოყენებას ბევრ სხვადასხვა კომპონენტში შევძლებთ.
 
-app.component.ts ახლა ასე გმაოიყურება:
+app.ts ახლა ასე გმაოიყურება:
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { HeroListComponent } from "./hero-list.component";
-import { HeroDetailsComponent } from "./hero-details.component";
+import { HeroList } from "./hero-list";
+import { HeroDetails } from "./hero-details";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, HeroListComponent, HeroDetailsComponent],
+  imports: [HeroList, HeroDetails],
   template: `
     <div class="container">
       <app-hero-list></app-hero-list>
@@ -45,7 +43,7 @@ import { HeroDetailsComponent } from "./hero-details.component";
     `,
   ],
 })
-export class AppComponent {}
+export class App {}
 ```
 
 აქ არანაირი ლოგიკა აღარ გვექნება, სანაცვლოდ გმირებზე ლოგიკას გავიტანთ სერვისში.
@@ -116,7 +114,7 @@ import { HeroService } from './hero.service.ts'
 ```
 
 ასე ანგულარი `HeroService`-ის უნიკალურ ინსტანციას შექმნის
-_მხოლოდ `AppComponent`-ისთვის_.
+_მხოლოდ `App`-ისთვის_.
 
 ამ შემთხვევაში ჩვენ`{providedIn: 'root'}`-ს დავტოვებთ. ანუ ეს
 სერვისი იქნება ე.წ "Singleton" სერვისი, სადაც მისი ერთი ინსტანცია
@@ -143,28 +141,22 @@ _მხოლოდ `AppComponent`-ისთვის_.
 არსებულ გმირს გადავცემთ ამ `pickedHero$` საბჯექთს. მასზე `next` მეთოდი ნაკადში
 ახალი გმირის მნიშვნელობას გადასცემს.
 
-`HeroListComponent`-ში ჩვენ კონსტრუქტორში ვაცხადებთ, რომ კლასი დამოკიდებულია
-`HeroService`-ის ინსტანციაზე, რომელსაც ჩვენ `public` თვისება `heroService`-ში შევინახავთ.
-ეს კონსტრუქტორში თვისების შექმნის შემოკლებული ვარიანტია.
+`HeroList`-ში ჩვენ ვაცხადებთ, რომ კლასი დამოკიდებულია
+`HeroService`-ის ინსტანციაზე. ამისთვის ვიყენებთ `inject` ფუნქციას
+`@angular/core`-დან და შედეგს კლასის თვისებაში ვინახავთ.
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { HeroService } from "../hero.service";
 
 @Component({
   selector: "app-hero-list",
-  standalone: true,
-  imports: [CommonModule],
   template: `
     <h2>Pick the hero</h2>
     <ul>
-      <li
-        *ngFor="let hero of heroService.heroes"
-        (click)="heroService.pickHero(hero)"
-      >
-        {{ hero.name }}
-      </li>
+      @for (hero of heroService.heroes; track hero.name) {
+        <li (click)="heroService.pickHero(hero)">{{ hero.name }}</li>
+      }
     </ul>
   `,
   styles: [
@@ -178,54 +170,60 @@ import { HeroService } from "../hero.service";
     `,
   ],
 })
-export class HeroListComponent {
+export class HeroList {
+  heroService = inject(HeroService);
+}
+```
+
+დაინჯექთების ძველი ვარიანტია კონსტრუქტორის პარამეტრები:
+
+```ts
+export class HeroList {
   constructor(public heroService: HeroService) {}
 }
 ```
 
-დაინჯექთების ალტერნატიული ვარიანტი არის `inject` ფუნქციის გამოყენება
-`@angular/core`-დან:
+ეს კვლავ მუშაობს და ძველ პროექტებში ხშირად შეგხვდებათ, თუმცა ანგულარის
+ოფიციალური სტილის სახელმძღვანელო `inject` ფუნქციას გვირჩევს: ის უფრო
+იკითხება მაშინ, როცა კლასს ბევრი დამოკიდებულება აქვს, უკეთეს ტიპებს
+გვაძლევს და მემკვიდრეობის დროს ნაკლებ პრობლემას ქმნის. არსებული პროექტის
+ავტომატურად გადასაყვანად არსებობს სქემატიკა:
 
-```ts
-import { inject } from "@angular/core";
-/* ... */
-export class HeroListComponent {
-  public heroService = inject(HeroService);
-}
+```sh
+ng generate @angular/core:inject
 ```
 
-ხშირად ეს ფუნქციის გამოყენება უფრო მოკლე და მარტივი გზაა (განსაკუთრებით injection token-ების დროს),
-თუმცა ეს დეველოპერის გემოვნებაზეა დამოკიდებული. თქვენ ის მეთოდი გამოიყენეთ, რომელიც მოგესურვებათ.
-
-`heroService` თვისება იმიტომ არის public,
+`heroService` თვისება იმიტომ არ არის `private`,
 რომ იგი ხელმისაწვდომი იყოს კლასის გარეთ, კერძოდ თემფლეითში, სადაც პირდაპირ
 სერვისიდან ვიღებთ გმირების მასივს და მას თეფლეითში განვათავსებთ. დაკლიკების
 ივენთზე ჩვენ სერვისზე არსებულ `pickHero` მეთოდს დავუძახებთ.
 
-`HeroDetailsComponent` კომპონენტშიც ჩვენ ამ სერვისზე ვაცხადებთ დამოკიდებულებას,
+`HeroDetails` კომპონენტშიც ჩვენ ამ სერვისზე ვაცხადებთ დამოკიდებულებას,
 მაგრამ მას ახლა `private` თვისებაში ვინახავთ, რადგან აქ მას (პორობითად) მხოლოდ
 კლასის შიგნით ვიყენებთ. აქ კონსტრუქტორშივე რაღაც საინტერესოს ვაკეთებთ:
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { HeroService } from "../hero.service";
 import { Hero } from "../types/hero";
 
 @Component({
   selector: "app-hero-details",
-  standalone: true,
-  imports: [CommonModule],
   template: `
-    <div *ngIf="hero">
-      <h2>{{ hero.name }}</h2>
-      <p>{{ hero.description }}</p>
-    </div>
+    @if (hero) {
+      <div>
+        <h2>{{ hero.name }}</h2>
+        <p>{{ hero.description }}</p>
+      </div>
+    }
   `,
 })
-export class HeroDetailsComponent {
+export class HeroDetails {
+  private heroService = inject(HeroService);
+
   hero: Hero | null = null;
-  constructor(private heroService: HeroService) {
+
+  constructor() {
     this.heroService.pickedHero$.subscribe((hero) => {
       this.hero = hero;
     });
@@ -241,10 +239,10 @@ export class HeroDetailsComponent {
 
 შევაჯამოთ აქ რა ხდება:
 
-- `HeroListComponent`-ში გმირზე დაკლიკებისას აქტიურდება `HeroService`-ში მეთოდი,
+- `HeroList`-ში გმირზე დაკლიკებისას აქტიურდება `HeroService`-ში მეთოდი,
   რომელიც `pickedHero` საბჯექტზე ააქტიურებს `next` მეთოდს, რაც ნაკადში ახალი გმირის
   მნიშვნელობას აბრუნებს - იმ გმირის, რომელიც ჩვენ მეთოდს მივაწოდეთ არგუმენტად.
-- ვინაიდან ჩვენ `HeroDetailsComponent`-ში დავასუბსქრაიბეთ ამ საბჯექტზე, მასზე დაძახებული
+- ვინაიდან ჩვენ `HeroDetails`-ში დავასუბსქრაიბეთ ამ საბჯექტზე, მასზე დაძახებული
   ყოველი `next` მეთოდი ააქტიურებს ჩვენ მიერ `subscribe`-ში განსაზღვრულ ქოლბექს, სადაც
   ახალი გმირის მნიშვნელობას ვიღებთ.
 - ამ ახალი გმირის მნიშვნელობას ჩვენ კლასის თვისებაში ვინახავთ და გამოვსახავთ თემფლეითში.

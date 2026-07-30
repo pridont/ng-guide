@@ -11,7 +11,7 @@ title: "Input & Output"
 ![input და output პრინციპების დიაგრამა](/assets/media/input-output.png)
 
 სანიმუშოდ შექმნილი გვაქვს ანგულარის ახალი აპლიკაცია, სადაც შევქმენით კომპონენტი სახელად child.
-ეს უკანასკნელი სელექტორით განვათავსეთ `app.component.html`-ში. `ChildComponent` გამოდის `AppComponent`-ის
+ეს უკანასკნელი სელექტორით განვათავსეთ `app.html`-ში. `Child` გამოდის `App`-ის
 შვილი.
 
 ## Input
@@ -21,16 +21,13 @@ title: "Input & Output"
 
 ```ts
 import { Component, Input } from "@angular/core";
-import { CommonModule } from "@angular/core";
 
 @Component({
   selector: "app-child",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./child.component.html",
-  styleUrl: "./child.component.scss",
+  templateUrl: "./child.html",
+  styleUrl: "./child.scss",
 })
-export class ChildComponent {
+export class Child {
   @Input() message: string = "";
 }
 ```
@@ -52,16 +49,13 @@ export class ChildComponent {
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrl: "./app.component.scss",
+  templateUrl: "./app.html",
+  styleUrl: "./app.scss",
 })
-export class AppComponent {
+export class App {
   messages = ["The first message", "The second message"];
 }
 ```
@@ -113,16 +107,13 @@ export class AppComponent {
 
 ```ts
 import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-child",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./child.component.html",
-  styleUrl: "./child.component.scss",
+  templateUrl: "./child.html",
+  styleUrl: "./child.scss",
 })
-export class ChildComponent {
+export class Child {
   @Input() message: string = "";
   @Output() lengthCount = new EventEmitter<number>();
 
@@ -163,7 +154,7 @@ export class ChildComponent {
 კონსოლში დალოგავს რიცხვს:
 
 ```ts
-// In AppComponent
+// App-ში
 logLength(length: number) {
   console.log(length);
 }
@@ -192,16 +183,13 @@ import {
   OnChanges,
   SimpleChanges,
 } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-child",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./child.component.html",
-  styleUrl: "./child.component.scss",
+  templateUrl: "./child.html",
+  styleUrl: "./child.scss",
 })
-export class ChildComponent implements OnChanges {
+export class Child implements OnChanges {
   @Input() message: string = "";
   @Output() lengthCount = new EventEmitter<number>();
 

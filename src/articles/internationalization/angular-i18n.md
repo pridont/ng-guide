@@ -78,7 +78,7 @@ ng add @angular/localize
 მოთავსებული ინფორმაცია ამ ლოკალის შესახებ, ეს ფაილი ჯერ არ შეგვიქმნია მაგრამ მალე შევქმნით. `localize` მასივის დამატებით ანგულარს ვეუბნებით,
 თუ რომელი ლოკალი შექმნას, როცა მოხდება ლოკალიზაციის პროცესი აპლიკაციაში.
 
-მარტივად დავარედაქტიროთ `app.component.html`:
+მარტივად დავარედაქტიროთ `app.html`:
 
 ```html
 <h1>Page header</h1>
@@ -104,12 +104,14 @@ ng add @angular/localize
 />
 ```
 
-ხოლო `app.component.ts` მხარეს, შევიტანოთ მცირედი მოდიფიკაციები. პირველ რიგში დავაინჯექტოთ კონსტრუქტორში `Title` და გამოვიყენოთ დაინჯექტებული სერვისი იმისათვის,
+ხოლო `app.ts`-ის მხარეს, შევიტანოთ მცირედი მოდიფიკაციები. პირველ რიგში დავაინჯექტოთ `Title` და გამოვიყენოთ დაინჯექტებული სერვისი იმისათვის,
 რომ შევცვალოთ დოკუმენტის `title`.
 
 ```ts
 title = 'Test page';
-constructor(private titleService: Title) {
+private titleService = inject(Title);
+
+constructor() {
    this.titleService.setTitle(this.title);
 }
 ```
@@ -118,16 +120,18 @@ constructor(private titleService: Title) {
 ეს ცვლადი შეიცვალოს იმ კონკრეტული ენის მნიშვნელობით.
 
 ```ts
-constructor(private titleService: Title) {
+private titleService = inject(Title);
+
+constructor() {
    this.titleService.setTitle($localize`${this.title}`);
 }
 ```
 
-[`$localize`](https://angular.io/api/localize/init/$localize) თეგის დამატებით ვნიშნავთ სტრინგებს ლოკალიზაციისთვის.
+[`$localize`](https://angular.dev/api/localize/init/$localize) თეგის დამატებით ვნიშნავთ სტრინგებს ლოკალიზაციისთვის.
 მაშასადამე, ნებისმიერი ცვლადი, რომელიც გვინდა რომ ტაიპსკრიპტის ფაილში გადაითარგმნოს, მოინიშნება ამ თეგით:
 
 ```ts
-export class MyComponent {
+export class Greeting {
   someString = $localize`This value can be localized!`;
   messages = [$localize`hello`, $localize`goodbye`];
 }

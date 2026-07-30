@@ -56,7 +56,7 @@ export const appConfig: ApplicationConfig = {
 };
 ```
 
-`AppComponent`-ის იმპორტებში შემოვიტანოთ `FormsModule`:
+`App`-ის იმპორტებში შემოვიტანოთ `FormsModule`:
 
 ```ts
 import { FormsModule } from "@angular/forms";

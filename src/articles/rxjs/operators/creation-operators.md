@@ -20,17 +20,14 @@ title: "Creation Operators"
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
 
@@ -50,17 +47,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { from } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // emit array as a sequence of values
   numbers$ = from([1, 2, 3, 4, 5]);
 
@@ -84,17 +78,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { of } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   //emits values of any type
   values$ = of({ name: "Brian" }, [1, 2, 3], function hello() {
     return "Hello";

@@ -16,8 +16,8 @@ ng generate component first
 ng generate component second
 ```
 
-ახლა ისე ვქნათ, რომ `/first` მისამართზე გამოვაჩინოთ `FirstComponent`,
-ხოლო `/second` მისამართზე - `SecondComponent`.
+ახლა ისე ვქნათ, რომ `/first` მისამართზე გამოვაჩინოთ `First`,
+ხოლო `/second` მისამართზე - `Second`.
 
 თუ დააკვირდებით, ანგულარის ვორქსფეისში უნდა გვქონდეს `app.routes.ts`
 ფაილი, სადაც ჩვენ რაუთინგის კონფიგურაცია შეგვიძლია. სწორედ აქ დავაიმპორტებთ
@@ -25,8 +25,8 @@ ng generate component second
 
 ```ts
 import { Routes } from "@angular/router";
-import { FirstComponent } from "./first/first.component";
-import { SecondComponent } from "./second/second.component";
+import { First } from "./first/first";
+import { Second } from "./second/second";
 
 export const routes: Routes = [];
 ```
@@ -56,12 +56,12 @@ export const appConfig: ApplicationConfig = {
 
 ```ts
 import { Routes } from "@angular/router";
-import { FirstComponent } from "./first/first.component";
-import { SecondComponent } from "./second/second.component";
+import { First } from "./first/first";
+import { Second } from "./second/second";
 
 const routes: Routes = [
-  { path: "first", component: FirstComponent },
-  { path: "second", component: SecondComponent },
+  { path: "first", component: First },
+  { path: "second", component: Second },
 ];
 ```
 
@@ -74,25 +74,24 @@ routes-ის მასივში ვამატებთ ობიექტ�
 - `component`: აქ მივუთითებთ იმ კომპონენტის კლასს, რომელიც გვინდა
   რომ მოცემულ მისამართზე ჩაიტვირთოს.
 
-ახლა გვჭირდება `AppComponent`-ის თემფლეითში `router-outlet`-ის განთავსება.
+ახლა გვჭირდება `App`-ის თემფლეითში `router-outlet`-ის განთავსება.
 ასე ანგულარს ეცოდინება რომ აქ უნდა მისამართის მიხედვით განვათავსოთ კომპონენტები.
 
 ```html
 <router-outlet></router-outlet>
 ```
 
-რადგან `router-outlet` standalone კომპონენტია, ის უნდა AppComponent-ის
+რადგან `router-outlet` standalone კომპონენტია, ის უნდა App-ის
 იმპორტების მასივში დავამატოთ:
 
 ```ts
 import { RouterOutlet } from "@angular/router";
 
 @Component({
-  standalone: true,
   imports: [RouterOutlet],
   /* ... */
 })
-export class AppComponent {}
+export class App {}
 ```
 
 ახლა თავიდან ბრაუზერში არაფერი გამოჩნდება, მაგრამ თუ ხელით შევცვლით მისამართს
@@ -100,7 +99,7 @@ export class AppComponent {}
 სათანადო კომპონენტების მარკაპს დავინახავთ.
 
 რა თქმა უნდა, ამის ხელით შეცვლა არ გვინდა. უნდა არსებობდეს ნავიგაციის ლინკები.
-`AppComponent`-ში შევქმნათ მინიმალური ჰედერი ნავიგაციით.
+`App`-ში შევქმნათ მინიმალური ჰედერი ნავიგაციით.
 
 ```html
 <header>
@@ -146,8 +145,8 @@ import { RouterModule } from "@angular/router";
 
 ```ts
 export const routes: Routes = [
-  { path: "first", component: FirstComponent },
-  { path: "second", component: SecondComponent },
+  { path: "first", component: First },
+  { path: "second", component: Second },
   { path: "", redirectTo: "first", pathMatch: "full" },
 ];
 ```
@@ -190,10 +189,10 @@ ng g c page-not-found
 
 ```ts
 export const routes: Routes = [
-  { path: "first", component: FirstComponent },
-  { path: "second", component: SecondComponent },
+  { path: "first", component: First },
+  { path: "second", component: Second },
   { path: "", redirectTo: "first", pathMatch: "full" },
-  { path: "**", component: NotFoundComponent },
+  { path: "**", component: NotFound },
 ];
 ```
 
@@ -201,7 +200,7 @@ export const routes: Routes = [
 ქვემოთ ჩამოუყვება მომხმარებლის მიერ გახსნილ რაუთს და შეამოწმებს თუ რომელი
 ჩვენ მიერ განსაზღვრული `path` ემთხვევა მას. თუ არც ერთი `path` არ დაემთხვა,
 უკანასკნელი ვარიანტი, რომელიც `**` არის მას გარანტირებულად დაიჭერს და
-`NotFoundComponent`-ს გახსნის.
+`NotFound`-ს გახსნის.
 
 ## Lazy Loading
 
@@ -218,15 +217,15 @@ export const routes: Routes = [
   {
     path: "first",
     loadComponent: () =>
-      import("./first/first.component").then((m) => m.FirstComponent),
+      import("./first/first").then((m) => m.First),
   },
   {
     path: "second",
     loadComponent: () =>
-      import("./second/second.component").then((m) => m.SecondComponent),
+      import("./second/second").then((m) => m.Second),
   },
   { path: "", redirectTo: "first", pathMatch: "full" },
-  { path: "**", component: NotFoundComponent },
+  { path: "**", component: NotFound },
 ];
 ```
 
@@ -236,7 +235,7 @@ export const routes: Routes = [
 თუ ჩვენ კლასს დავაექსპორტებთ `default` ქივორდით:
 
 ```ts
-export default class FirstComponent {}
+export default class First {}
 ```
 
 მაშინ აღარ დაგვჭირდება `then` მეთოდი, რათა ნეიმსფეისიდან ამოვიღოთ კომპონენტის კლასი.
