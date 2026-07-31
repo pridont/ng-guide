@@ -1,5 +1,5 @@
 allowBuilds:
   esbuild: true
   pagefind: set this to true or false
-  puppeteer: true
+  puppeteer: false
   workerd: true

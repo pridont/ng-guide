@@ -10,11 +10,16 @@
  * diagram never launches the browser.
  */
 const { createHash } = require("crypto");
-const { readFileSync, writeFileSync, mkdirSync, existsSync } = require("fs");
+const { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } = require("fs");
 const { readdirSync } = require("fs");
 const path = require("path");
 
-const CACHE_DIR = path.join(".temp", "mermaid");
+/*
+ * Committed on purpose. The site is built on Cloudflare's CI, whose image has
+ * no Chromium shared libraries, so the deploy build must find every diagram
+ * already rendered. `pnpm run diagrams` refreshes this directory locally.
+ */
+const CACHE_DIR = "diagrams";
 const TOKENS_CSS = path.join("src", "styles", "tokens.css");
 const FONT_DIR = path.join("src", "assets", "fonts");
 const THEMES = ["dark", "light"];
@@ -216,11 +221,25 @@ body{font-family:${FONT_STACK};margin:0;}
 </style><body></body>`;
 }
 
+async function launch() {
+  try {
+    return await require("puppeteer").launch();
+  } catch (err) {
+    throw new Error(
+      "mermaid: some diagrams are not in the committed `diagrams/` cache and " +
+        "Chromium could not be launched to render them.\n" +
+        "Run `pnpm run diagrams` locally and commit the result — the deploy " +
+        "build cannot render diagrams itself.\n" +
+        "If Chromium is missing locally: npx puppeteer browsers install chrome\n\n" +
+        err.message,
+    );
+  }
+}
+
 async function renderMissing(missing, sources) {
-  const puppeteer = require("puppeteer");
   const palette = palettes();
 
-  const browser = await puppeteer.launch();
+  const browser = await launch();
   try {
     const page = await browser.newPage();
     await page.setContent(harness(), { waitUntil: "load" });
@@ -295,6 +314,14 @@ async function prepare() {
   }
 
   if (missing.length) await renderMissing(missing, sources);
+
+  // Entries are content-addressed, so an edited diagram leaves its old SVG
+  // behind. Dropping unreferenced ones keeps the committed directory honest.
+  for (const file of readdirSync(CACHE_DIR)) {
+    if (file.endsWith(".svg") && !rendered.has(file.slice(0, -4))) {
+      rmSync(path.join(CACHE_DIR, file));
+    }
+  }
 }
 
 /** Synchronous lookup for the markdown-it fence rule. */

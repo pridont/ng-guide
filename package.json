@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "eleventy --serve",
     "build": "eleventy",
+    "diagrams": "node util/render-diagrams.js",
     "build:quiet": "eleventy --quiet",
     "preview": "wrangler dev",
     "deploy": "pnpm run build && wrangler deploy",
