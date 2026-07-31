@@ -12,6 +12,6 @@ RxJS არის ჯავასკრიპტის ბიბლიოთე�
 
 ამ თავში ვისწავლით:
 
-- [Observable Stream-ს](./observable-stream.html) - RxJS-ის მთავარ კონცეფციას;
-- [RxJS ოპერატორებს](./operators/) - სტრიმის კონტროლისთვის;
-- [Subject-ებს](./subjects.html) - სტრიმის სპეციფიკურ (და გაკონტროლებად) სახეობას.
+- [Observable Stream-ს](./observable-stream.html) — RxJS-ის მთავარ კონცეფციას;
+- [RxJS ოპერატორებს](./operators/) — სტრიმის კონტროლისთვის;
+- [Subject-ებს](./subjects.html) — სტრიმის სპეციფიკურ (და გაკონტროლებად) სახეობას.

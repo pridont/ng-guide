@@ -30,13 +30,17 @@ Resolver არის ჩვეულებრივი ფუნქცია `R
 
 ```ts
 import { inject } from "@angular/core";
-import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from "@angular/router";
+import {
+  ActivatedRouteSnapshot,
+  ResolveFn,
+  RouterStateSnapshot,
+} from "@angular/router";
 import { Product } from "./product.model";
 import { ProductsService } from "./products-service";
 
 export const productResolver: ResolveFn<Product | undefined> = (
   route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot
+  state: RouterStateSnapshot,
 ) => {
   const productsService = inject(ProductsService);
   const id = Number(route.paramMap.get("id"));
@@ -160,7 +164,7 @@ export class ProductDetails {
 
 ## ერორების დამუშავება
 
-თუ resolver ერორს დააგდებს, ნავიგაცია **ჩავარდება** და მომხმარებელი
+თუ resolver ერორს ამოაგდებს, ნავიგაცია **ჩავარდება** და მომხმარებელი
 ძველ გვერდზე დარჩება, ხოლო კონსოლში `NavigationError` გამოჩნდება. ეს
 ცუდი გამოცდილებაა, ამიტომ ერორები უნდა დავამუშაოთ.
 
@@ -176,7 +180,7 @@ export const productResolver: ResolveFn<Product | null> = (route) => {
     catchError(() => {
       router.navigate(["/not-found"]);
       return of(null);
-    })
+    }),
   );
 };
 ```
@@ -189,11 +193,11 @@ provideRouter(
   routes,
   withNavigationErrorHandler((error) => {
     inject(Router).navigate(["/error"]);
-  })
+  }),
 );
 ```
 
-## როდის *არ* გამოვიყენოთ
+## როდის _არ_ გამოვიყენოთ
 
 Resolver ნავიგაციას **აჩერებს**, სანამ მონაცემი არ ჩამოვა. ეს ერთდროულად
 მისი უპირატესობაცაა და ნაკლიც: თუ მოთხოვნა ნელია, მომხმარებელი ისე
@@ -207,5 +211,5 @@ Resolver ნავიგაციას **აჩერებს**, სანა�
   სტატისტიკა) → სჯობს გვერდი გაიხსნას და მონაცემი [`httpResource`-ით](/http/)
   ჩამოვიდეს, თავისი `isLoading()` მდგომარეობით
 
-კარგი წესია: თუ resolver-ის მოთხოვნა 200-300 მილიწამზე მეტს გრძელდება,
+კარგი წესია: თუ resolver-ის მოთხოვნა 200–300 მილიწამზე მეტს გრძელდება,
 ჯობია მისი გვერდში გადატანა და ჩატვირთვის მდგომარეობის ჩვენება.

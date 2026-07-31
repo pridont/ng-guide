@@ -12,12 +12,12 @@ title: "თემფლეითები"
 **დატა ბაინდინგი** — ელემენტებსა თუ კომპონენტებს დინამიკურად ვანიჭებთ
 თვისებებსა და ატრიბუტებს, ასევე ვუსმენთ მათზე არსებულ მოვლენებს:
 
-- [Poperty & attribute binding](./property-and-attribute-binding.html) - ელემენტის თვისებებსა და ატრიბუტზე მონაცემების მიბმა;
-- [Input & Output](./input-output.html) - დატა ბაინდინგი კომპონენტის პერსპექტივიდან;
-- [Two-way binding](./two-way-binding.html) - დატა ბაინდინგისა და ივენთ ბაინდინგის კომბინაცია;
-- [Content Projection](./content-projection.html) - მარკაპის გადაცემა კომპონენტისთვის;
-- [Queries](./queries.html) - შვილ კომპონენტებზე პირდაპირი წვდომა;
-- [Host ელემენტი](/at-host/) - ბაინდინგი იმ ელემენტზე, რომელზეც კომპონენტი "ზის".
+- [Poperty & attribute binding](./property-and-attribute-binding.html) — ელემენტის თვისებებსა და ატრიბუტზე მონაცემების მიბმა;
+- [Input & Output](./input-output.html) — დატა ბაინდინგი კომპონენტის პერსპექტივიდან;
+- [Two-way binding](./two-way-binding.html) — დატა ბაინდინგისა და ივენთ ბაინდინგის კომბინაცია;
+- [Content Projection](./content-projection.html) — მარკაპის გადაცემა კომპონენტისთვის;
+- [Queries](./queries.html) — შვილ კომპონენტებზე პირდაპირი წვდომა;
+- [Host ელემენტი](/at-host/) — ბაინდინგი იმ ელემენტზე, რომელზეც კომპონენტი "ზის".
 
 **[Control Flow](/control-flow/)** — თემფლეითში პირობებსა და ციკლებს
 ვმართავთ `@if`, `@for` და `@switch` ბლოკებით, ხოლო

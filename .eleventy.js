@@ -32,11 +32,6 @@ module.exports = function (eleventyConfig) {
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);
 
-  // cuts out the starting '/articles' from output url
-  eleventyConfig.addFilter("rootify", (url) => {
-    return url.replace("/articles", "/");
-  });
-
   // Book outline rendered straight from SUMMARY.md, current page marked.
   eleventyConfig.addFilter("sidenav", (page) => bookSummary.render(page));
 

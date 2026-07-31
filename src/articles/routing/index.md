@@ -17,6 +17,6 @@ Single page application-ში ჩვენ მომხმარებლის
 ამ თავში ვისწავლით:
 
 - [მარტივ routing-ს](./basic-routing.html)
-- [Child routing-ს](./child-routing.html) - ანუ რაუთინგს რაუთინგის შიგნით!
+- [Child routing-ს](./child-routing.html) — ანუ რაუთინგს რაუთინგის შიგნით!
 - [დინამიკურ route-ებთან მუშაობას](./dynamic-routes/)
-- და [Data Resolvers-ს](./data-resolvers.html) - მონაცემების ჩამოტვირთვას ნავიგაციამდე.
+- და [Data Resolvers-ს](./data-resolvers.html) — მონაცემების ჩამოტვირთვას ნავიგაციამდე.
