@@ -137,12 +137,7 @@ body[data-nav="closed"] .sidenav {
   background-color: var(--fg);
 }
 
-/*
- * Firefox has no ::-webkit-scrollbar. Setting scrollbar-width in Chrome would
- * disable the rules above and hand the column back to fading overlay bars, so
- * the standard properties are fenced off to engines that need them.
- */
-@supports not selector(::-webkit-scrollbar) {
+@supports (-moz-appearance: none) {
   :root {
     scrollbar-width: thin;
     scrollbar-color: var(--panel) transparent;
