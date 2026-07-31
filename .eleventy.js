@@ -9,13 +9,22 @@ const bookSummary = require("./util/summary");
 const gitDates = require("./util/git-dates");
 const codeFence = require("./util/code-fence");
 const mermaid = require("./util/mermaid");
+const cssBundle = require("./util/css-bundle");
 
 const REPO = "https://github.com/CondensedMilk7/ng-guide";
 
 module.exports = function (eleventyConfig) {
-  eleventyConfig.addPassthroughCopy("./src/styles");
+  // The screen stylesheets are inlined by the `criticalCss` shortcode, so only
+  // the print sheet still needs to be served as a file.
+  eleventyConfig.addPassthroughCopy({
+    "./src/styles/print.css": "styles/print.css",
+  });
   eleventyConfig.addPassthroughCopy("./src/assets");
   eleventyConfig.addPassthroughCopy("./src/scripts");
+
+  // Nothing else references the bundled sheets, so `--serve` would not rebuild
+  // when one of them changes.
+  eleventyConfig.addWatchTarget("./src/styles");
 
   eleventyConfig.addPlugin(pluginRss);
 
@@ -32,6 +41,9 @@ module.exports = function (eleventyConfig) {
   });
 
   eleventyConfig.addShortcode("year", () => `${new Date().getFullYear()}`);
+
+  // Every screen stylesheet, concatenated and minified, for the inline <style>.
+  eleventyConfig.addShortcode("criticalCss", () => cssBundle.build());
 
   // Book outline rendered straight from SUMMARY.md, current page marked.
   eleventyConfig.addFilter("sidenav", (page) => bookSummary.render(page));
@@ -78,6 +90,7 @@ module.exports = function (eleventyConfig) {
   // Diagrams are rendered to SVG before any template runs, because the
   // markdown-it fence rule that injects them cannot await.
   eleventyConfig.on("eleventy.before", async () => {
+    cssBundle.reset();
     await mermaid.prepare();
   });
 

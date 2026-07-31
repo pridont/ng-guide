@@ -2,7 +2,7 @@
 title: "ანგულარის ქართული გზამკვლევი"
 ---
 
-<img src="./assets/angular.svg" id="ng-landing-logo" alt="Angular logo" style="max-width: 200px; margin: 1rem auto 0 auto;" />
+<img src="./assets/angular.svg" id="ng-landing-logo" alt="Angular logo" width="242" height="256" decoding="async" style="max-width: 200px; margin: 1rem auto 0 auto;" />
 
 # ანგულარის ქართული გზამკვლევი
 
@@ -38,5 +38,5 @@ title: "ანგულარის ქართული გზამკვლ�
 - [angular.dev](https://angular.dev)
 
 <div style="text-align: center; margin-top: 100px;">
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" width="88" height="31" loading="lazy" decoding="async" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
 </div>

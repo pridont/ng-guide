@@ -9,9 +9,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "eleventy --serve",
-    "build": "eleventy",
+    "build": "rm -rf public && eleventy",
     "diagrams": "node util/render-diagrams.js",
-    "build:quiet": "eleventy --quiet",
+    "build:quiet": "rm -rf public && eleventy --quiet",
     "preview": "wrangler dev",
     "deploy": "pnpm run build && wrangler deploy",
     "preinstall": "npx only-allow pnpm"
@@ -21,6 +21,7 @@
   "devDependencies": {
     "@11ty/eleventy": "^2.0.1",
     "@11ty/eleventy-plugin-rss": "^1.2.0",
+    "clean-css": "^5.3.3",
     "highlight.js": "^11.8.0",
     "luxon": "^3.4.4",
     "markdown-it": "^13.0.2",

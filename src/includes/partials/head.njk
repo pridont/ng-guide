@@ -2,28 +2,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>{{ title }} - Angular Guide</title>
-  <meta name="description" content="{{ description }}">
-  <meta name="color-scheme" content="dark light">
-  <meta property="og:title" content="{{ title }}">
-  <meta property="og:image" content="/assets/cover.jpg">
-  <meta property="og:description" content="Angular-ის ქართული არაოფიციალური სახელმძღვანელო. ისწავლე ანგულარის საფუძვლები ქართულ ენაზე.">
+  {# `canonical` strips the `.html` Cloudflare redirects away — same url the
+     sitemap lists. #}
+  {%- set pageUrl = site.url + (page.url | canonical) %}
+  {%- set pageDescription = description or site.description %}
 
+  <title>{{ title }} - Angular Guide</title>
+  <meta name="description" content="{{ pageDescription }}">
+  <meta name="color-scheme" content="dark light">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="{{ pageUrl }}">
+  <meta property="og:title" content="{{ title }}">
+  <meta property="og:image" content="{{ site.url }}/assets/cover.jpg">
+  <meta property="og:description" content="{{ pageDescription }}">
+
+  <link rel="canonical" href="{{ pageUrl }}">
   <link rel="icon" href="/assets/favicon-32x32.png">
 
+  {#
+    Loaded as a preload that promotes itself, so the third-party stylesheet and
+    the woff2 chain behind it never block first paint. Text renders immediately
+    in the metric-matched fallbacks declared in `tokens.css`, then swaps.
+  #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap"></noscript>
 
-  <link rel="stylesheet" href="/styles/main.css" />
-  <link rel="stylesheet" href="/styles/animations.css" />
-  <link rel="stylesheet" href="/styles/elements/article.css">
-  <link rel="stylesheet" href="/styles/elements/header.css">
-  <link rel="stylesheet" href="/styles/elements/footer.css">
-  <link rel="stylesheet" href="/styles/elements/search.css">
-  <link rel="stylesheet" href="/styles/highlight-theme.css">
-  <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
-  <link rel="stylesheet" href="/styles/print.css">
+  {# Whole screen stylesheet, inlined — see `util/css-bundle.js`. #}
+  <style>{% criticalCss %}</style>
+  <link rel="stylesheet" href="/styles/print.css" media="print">
 
   {# Applied before first paint so the stored theme never flashes. #}
   <script>
@@ -41,6 +49,7 @@
     })();
   </script>
 
+  {# Pagefind is 120 KB and most visits never search, so `main.js` pulls it in
+     the first time the dialog is opened. #}
   <script type="module" src="/scripts/main.js"></script>
-  <script defer src="/pagefind/pagefind-ui.js" onload="new PagefindUI({ element: '#search', showImages: false });"></script>
 </head>

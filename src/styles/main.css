@@ -1,4 +1,4 @@
-@import "/styles/tokens.css";
+/* `tokens.css` is concatenated ahead of this file by `util/css-bundle.js`. */
 
 *,
 *::before,

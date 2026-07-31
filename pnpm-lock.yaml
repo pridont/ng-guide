@@ -14,6 +14,9 @@ importers:
       '@11ty/eleventy-plugin-rss':
         specifier: ^1.2.0
         version: 1.2.0
+      clean-css:
+        specifier: ^5.3.3
+        version: 5.3.3
       highlight.js:
         specifier: ^11.8.0
         version: 11.11.1
@@ -801,6 +804,10 @@ packages:
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0'}
     peerDependencies:
       devtools-protocol: '*'
+
+  clean-css@5.3.3:
+    resolution: {integrity: sha512-D5J+kHaVb/wKSFcyyV75uCn8fiY4sV38XJoe4CUyGQ+mOU/fMVYUdH1hJC+CJQ5uY3EnW27SbJYS4X8BiLrAFg==}
+    engines: {node: '>= 10.0'}
 
   cliui@9.0.1:
     resolution: {integrity: sha512-k7ndgKhwoQveBL+/1tqGJYNz097I7WOvwbmmU2AR5+magtbjPWQTS1C5vzGkBC8Ym8UWRzfKUzUUqFLypY4Q+w==}
@@ -2517,6 +2524,10 @@ snapshots:
       devtools-protocol: 0.0.1653615
       mitt: 3.0.1
       zod: 3.25.76
+
+  clean-css@5.3.3:
+    dependencies:
+      source-map: 0.6.1
 
   cliui@9.0.1:
     dependencies:

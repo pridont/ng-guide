@@ -3,6 +3,34 @@
  * Values come from the Angular Guide design system (apricot / lilac / cyan on
  * a plum-tinted neutral ramp).
  */
+/*
+ * Local stand-ins used while the webfonts download — the Google stylesheet is
+ * loaded off the critical path, so first paint always happens in these.
+ *
+ * The overrides map each local face's metrics onto the webfont's, so the swap
+ * changes glyph shapes without moving a line box. Numbers are measured, not
+ * estimated: x-height, ascent and descent were read off canvas `TextMetrics`
+ * at 100px, then size-adjust = xHeight(web)/xHeight(local) and the ascent and
+ * descent overrides divided through by it.
+ */
+@font-face {
+  font-family: "Noto Sans Fallback";
+  src: local("Helvetica Neue"), local("Arial"), local("Roboto");
+  size-adjust: 103.5%;
+  ascent-override: 103.4%;
+  descent-override: 28.0%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "DM Mono Fallback";
+  src: local("Menlo"), local("Consolas"), local("Roboto Mono");
+  size-adjust: 90.7%;
+  ascent-override: 109.2%;
+  descent-override: 34.2%;
+  line-gap-override: 0%;
+}
+
 :root {
   --bg: #120f15;
   --panel: #1f1826;
@@ -47,8 +75,9 @@
    * x-height, weights and stroke contrast — no optical jump mid-sentence when a
    * Georgian paragraph quotes an API name.
    */
-  --font-sans: "Noto Sans", "Noto Sans Georgian", system-ui, sans-serif;
-  --font-mono: "DM Mono", "Noto Sans Georgian", ui-monospace, monospace;
+  /* Fallback faces sit after the real ones, so they only apply during load. */
+  --font-sans: "Noto Sans", "Noto Sans Georgian", "Noto Sans Fallback", system-ui, sans-serif;
+  --font-mono: "DM Mono", "Noto Sans Georgian", "DM Mono Fallback", ui-monospace, monospace;
 
   /* Kept for backwards compatibility with older inline styles in articles. */
   --font-default: var(--font-sans);

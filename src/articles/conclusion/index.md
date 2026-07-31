@@ -25,6 +25,10 @@ title: "ბოლოსიტყვაობა"
     src="/assets/media/frieren-ng-guide-transp.webp"
     class="no-print img-responsive"
     style="max-width: 320px;"
+    width="815"
+    height="815"
+    loading="lazy"
+    decoding="async"
     alt="ელფი გოგონა კითხულობს ანგულარის გზამკვლევს"
   />
 </a>

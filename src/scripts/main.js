@@ -95,7 +95,17 @@ function setupToc() {
     );
   };
 
-  window.addEventListener("scroll", spy, { passive: true });
+  let queued = false;
+  const onScroll = () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      spy();
+    });
+  };
+
+  window.addEventListener("scroll", onScroll, { passive: true });
   spy();
 }
 
@@ -126,6 +136,43 @@ function setupCodeCopy() {
   });
 }
 
+/*
+ * Pagefind's bundle is ~120 KB and its stylesheet another 14 KB, all of it dead
+ * weight on a visit that never searches. Both are fetched the first time the
+ * dialog is asked for, and the promise is kept so later opens are free.
+ *
+ * The stylesheet is appended after the document's inline <style>, which is
+ * where the old <link> sat too — `search.css` still loses the specificity ties
+ * it lost before.
+ */
+let pagefindReady = null;
+
+function loadPagefind() {
+  if (pagefindReady) return pagefindReady;
+
+  pagefindReady = new Promise((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "/pagefind/pagefind-ui.css";
+    document.head.append(css);
+
+    const script = document.createElement("script");
+    script.src = "/pagefind/pagefind-ui.js";
+    script.addEventListener("load", () => {
+      new PagefindUI({ element: "#search", showImages: false });
+      resolve();
+    });
+    script.addEventListener("error", () => {
+      // Let the next open retry rather than wedging search for the session.
+      pagefindReady = null;
+      reject(new Error("pagefind failed to load"));
+    });
+    document.head.append(script);
+  });
+
+  return pagefindReady;
+}
+
 function setupSearch() {
   const btn = document.querySelector("#search-toggler");
   const dialog = document.querySelector(".search-dialog");
@@ -136,7 +183,7 @@ function setupSearch() {
   const label = btn.querySelector(".searchpill__label");
   const kbd = btn.querySelector("kbd");
 
-  const set = (open) => {
+  const set = async (open) => {
     dialog.classList.toggle("visible", open);
     btn.setAttribute("aria-expanded", String(open));
 
@@ -146,11 +193,21 @@ function setupSearch() {
     if (label) label.textContent = open ? "დახურვა" : "ძებნა";
     if (kbd) kbd.hidden = open;
 
-    if (open) {
-      const input = dialog.querySelector(".pagefind-ui__search-input");
-      if (input) input.focus();
-    }
+    if (!open) return;
+
+    // The input is Pagefind's own, so it only exists once the bundle has run.
+    await loadPagefind().catch(() => {});
+    const input = dialog.querySelector(".pagefind-ui__search-input");
+    if (input && dialog.classList.contains("visible")) input.focus();
   };
+
+  // Fetch on intent, so the click itself has nothing left to wait for.
+  btn.addEventListener("pointerenter", () => loadPagefind().catch(() => {}), {
+    once: true,
+  });
+  btn.addEventListener("focus", () => loadPagefind().catch(() => {}), {
+    once: true,
+  });
 
   btn.addEventListener("click", () =>
     set(!dialog.classList.contains("visible")),
