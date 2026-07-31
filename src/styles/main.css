@@ -475,8 +475,12 @@ body[data-nav="closed"] .sidenav {
   }
 }
 
+/*
+ * Scaled on the root, not on `body` — every size in the sheet is in `rem`, so
+ * only the root font size actually moves them.
+ */
 @media (max-width: 650px) {
-  body {
+  :root {
     font-size: 15px;
   }
 }

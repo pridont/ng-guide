@@ -44,6 +44,10 @@ function install(md) {
       "</div>",
     ].join("");
   };
+
+  // Wide tables scroll in a wrapper, so the table keeps its own semantics.
+  md.renderer.rules.table_open = () => '<div class="table-scroll"><table>';
+  md.renderer.rules.table_close = () => "</table></div>";
 }
 
 module.exports = { install, LANGUAGES };

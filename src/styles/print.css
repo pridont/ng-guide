@@ -56,7 +56,8 @@
     break-inside: avoid;
   }
 
-  .prose pre {
+  .prose pre,
+  .table-scroll {
     overflow: visible;
   }
 

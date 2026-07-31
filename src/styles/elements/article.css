@@ -38,14 +38,14 @@ body[data-nav="closed"] .doc {
   font-size: 2.5rem;
   font-weight: 700;
   line-height: 1.12;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
 .doc__lead {
   margin-top: 1rem;
   max-width: var(--measure);
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1.5;
   color: var(--muted);
   text-wrap: pretty;
@@ -74,13 +74,22 @@ body[data-nav="closed"] .doc {
 
 .prose {
   max-width: var(--measure);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.75;
   text-wrap: pretty;
 }
 
 .prose > * + * {
-  margin-top: 1.5rem;
+  margin-top: 1.6rem;
+}
+
+/*
+ * Standalone blocks get more air than running paragraphs, so a code sample or
+ * a table reads as its own unit rather than as another paragraph.
+ */
+.prose > :is(.codeblock, figure, .table-scroll, blockquote) + :not(h2, h3, h4),
+.prose > :not(h2, h3, h4) + :is(.codeblock, figure, .table-scroll, blockquote) {
+  margin-top: 2rem;
 }
 
 .prose a {
@@ -107,8 +116,16 @@ body[data-nav="closed"] .doc {
 .prose h3,
 .prose h4 {
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  /* Georgian letterforms are round and already tight; heavy negative tracking
+     that flatters Latin closes them up too far. */
+  letter-spacing: -0.01em;
   scroll-margin-top: calc(var(--header-h) + 1.5rem);
+}
+
+/* A heading belongs to what follows it, so it sits closer to its own text than
+   to the section it was separated from. */
+.prose :is(h2, h3, h4) + * {
+  margin-top: 0.85rem;
 }
 
 .prose h1 {
@@ -134,6 +151,12 @@ body[data-nav="closed"] .doc {
   margin-top: 2rem;
   font-size: 1.1rem;
   font-weight: 700;
+}
+
+/* The section-opening gap above belongs to the parent heading; a subheading
+   stacked straight onto it would otherwise open a second hole. */
+.prose :is(h2, h3) + :is(h3, h4) {
+  margin-top: 1.25rem;
 }
 
 .prose h1 a,
@@ -213,11 +236,11 @@ body[data-nav="closed"] .doc {
 
 /* ----------------------------------------------------------------- code -- */
 
+/* The tint alone marks inline code; a border on top of it speckles dense text. */
 .prose :not(pre) > code {
   font-family: var(--font-mono);
-  font-size: 0.85em;
+  font-size: 0.9em;
   background: var(--panel);
-  border: 1px solid var(--rule);
   padding: 0.1em 0.4em;
   border-radius: 5px;
   color: var(--apricot);
@@ -280,7 +303,7 @@ body[data-nav="closed"] .doc {
   overflow-x: auto;
   background: var(--panel);
   font-family: var(--font-mono);
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   line-height: 1.65;
   color: var(--fg);
 }
@@ -301,9 +324,6 @@ body[data-nav="closed"] .doc {
   background: var(--panel);
   border-radius: 0 8px 8px 0;
   padding: 1.1rem 1.3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
 }
 
 .prose blockquote > * + * {
@@ -311,7 +331,7 @@ body[data-nav="closed"] .doc {
 }
 
 .prose blockquote p {
-  font-size: 1.0625rem;
+  font-size: 1rem;
   line-height: 1.65;
 }
 
@@ -354,12 +374,17 @@ body[data-nav="closed"] .doc {
   margin: 2.5rem 0;
 }
 
+/* The scroll lives on a wrapper: `display: block` on the table itself would
+   strip its row/column semantics from screen readers. */
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.95rem;
-  display: block;
-  overflow-x: auto;
 }
 
 .prose th,

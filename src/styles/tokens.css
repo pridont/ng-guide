@@ -38,9 +38,16 @@
   --shell-pad: 2rem;
   --sidenav-w: 17.5rem;
   --toc-w: 15rem;
-  --measure: 44rem;
+  /* Sized against the prose font so the line stays ~38 characters wide in em
+     terms; shrinking the text without this widens every line. */
+  --measure: 40rem;
 
-  --font-sans: "Hanken Grotesk", "Noto Sans Georgian", system-ui, sans-serif;
+  /*
+   * Latin and Georgian come from the same superfamily, so the two scripts share
+   * x-height, weights and stroke contrast — no optical jump mid-sentence when a
+   * Georgian paragraph quotes an API name.
+   */
+  --font-sans: "Noto Sans", "Noto Sans Georgian", system-ui, sans-serif;
   --font-mono: "DM Mono", "Noto Sans Georgian", ui-monospace, monospace;
 
   /* Kept for backwards compatibility with older inline styles in articles. */
