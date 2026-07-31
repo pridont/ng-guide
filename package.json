@@ -25,7 +25,9 @@
     "markdown-it": "^13.0.2",
     "markdown-it-anchor": "^8.6.7",
     "markdown-it-highlightjs": "^4.0.1",
+    "mermaid": "^11.16.0",
     "pagefind": "^1.5.2",
+    "puppeteer": "^25.4.0",
     "wrangler": "^4.114.0"
   }
 }

@@ -521,6 +521,40 @@ export class ShoppingCart implements OnInit {
 
 ## შეჯამება
 
+ნაკადი ორ ნაწილად იყოფა. ჯერ შესვლა, სადაც ტოკენს ვიღებთ და ვინახავთ:
+
+```mermaid
+sequenceDiagram
+    participant U as მომხმარებელი
+    participant A as AuthService
+    participant S as სერვერი
+    participant L as localStorage
+
+    U->>A: login()
+    A->>S: POST /auth/login
+    S-->>A: token
+    A->>L: token-ის შენახვა
+```
+
+შემდეგ კი ყოველი დაცული მოთხოვნა:
+
+```mermaid
+sequenceDiagram
+    participant C as CartService
+    participant I as authInterceptor
+    participant L as localStorage
+    participant S as სერვერი
+
+    C->>I: GET /cart
+    I->>L: token-ის წაკითხვა
+    L-->>I: token
+    I->>S: GET /cart + Bearer
+    S-->>C: მონაცემები
+```
+
+ყურადღება მიაქციეთ: `CartService` ტოკენის შესახებ არაფერს ამბობს —
+ჰედერს `authInterceptor` ამატებს მისგან დამოუკიდებლად.
+
 ჩვენ ამ თავში ანგულარში ვისწავლეთ ავთენტიფიკაცია JWT-ის საშუალებით. ჩვენ დავწერეთ `authInterceptor`, რომელიც ავტომატურად
 ამატებს ტოკენს მოთხოვნების ჰედერებში, და `jwt.ts`, სადაც ტოკენის დეკოდირებისა
 და ვადის შემოწმების ლოგიკაა.

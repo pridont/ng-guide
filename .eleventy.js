@@ -8,6 +8,7 @@ const filterArticles = require("./util/sort-articles");
 const bookSummary = require("./util/summary");
 const gitDates = require("./util/git-dates");
 const codeFence = require("./util/code-fence");
+const mermaid = require("./util/mermaid");
 
 const REPO = "https://github.com/CondensedMilk7/ng-guide";
 
@@ -72,6 +73,12 @@ module.exports = function (eleventyConfig) {
   eleventyConfig.addFilter("issueUrl", (title) => {
     const subject = encodeURIComponent(`შეცდომა: ${title || ""}`.trim());
     return `${REPO}/issues/new?title=${subject}`;
+  });
+
+  // Diagrams are rendered to SVG before any template runs, because the
+  // markdown-it fence rule that injects them cannot await.
+  eleventyConfig.on("eleventy.before", async () => {
+    await mermaid.prepare();
   });
 
   eleventyConfig.on("eleventy.after", () => {

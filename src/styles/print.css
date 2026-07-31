@@ -61,6 +61,21 @@
     overflow: visible;
   }
 
+  /* print.js forces the light theme, but the swap is spelled out here too so
+     the light copy wins even if that handler never ran. */
+  .diagram__out--dark {
+    display: none !important;
+  }
+
+  .diagram__out--light {
+    display: block !important;
+  }
+
+  .diagram {
+    overflow: visible;
+    break-inside: avoid;
+  }
+
   .prose pre code {
     overflow: visible;
     white-space: pre-wrap;

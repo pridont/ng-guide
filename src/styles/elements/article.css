@@ -317,6 +317,35 @@ body[data-nav="closed"] .doc {
   color: inherit;
 }
 
+/* -------------------------------------------------------------- diagrams - */
+
+/*
+ * Every diagram is rendered at build time once per palette and both copies ship
+ * in the page. Swapping them with CSS keeps the theme toggle instant, works
+ * with scripting off, and leaves `print.js`'s synchronous switch to light with
+ * an SVG already in the DOM. `.prose figure` supplies the layout.
+ */
+.diagram {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.diagram__out {
+  display: none;
+}
+
+:root:not([data-theme="light"]) .diagram__out--dark,
+:root[data-theme="light"] .diagram__out--light {
+  display: block;
+}
+
+.diagram svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+}
+
 /* -------------------------------------------------------------- callouts - */
 
 .prose blockquote {

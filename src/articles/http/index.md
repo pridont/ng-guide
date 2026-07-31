@@ -530,6 +530,29 @@ export const appConfig: ApplicationConfig = {
 მოთხოვნას ჯერ `loggingInterceptor` დაამუშავებს და შემდეგ `authInterceptor`-ს
 გადასცემს.
 
+პასუხი კი **უკუღმა** ბრუნდება — იმავე ინტერსეპტორებში, ოღონდ
+შებრუნებული რიგით. ანუ `next(req)`-ის დაძახება ჯაჭვში ქვევით გადადგმული
+ნაბიჯია, ხოლო მისი დაბრუნებული `Observable` — ამავე გზით უკან ამოსული
+პასუხი:
+
+```mermaid
+sequenceDiagram
+    participant H as HttpClient
+    participant L as loggingInterceptor
+    participant A as authInterceptor
+    participant S as სერვერი
+
+    H->>L: მოთხოვნა
+    L->>A: next(req)
+    A->>S: next(req) + Authorization
+    S-->>A: პასუხი
+    A-->>L: პასუხი
+    L-->>H: პასუხი
+```
+
+ამიტომ პასუხის დამუშავება (მაგალითად ერორის დაჭერა) `next(req)`-ის
+შედეგზე ხდება და არა მის წინ.
+
 ვინაიდან ინტერსეპტორი ფუნქციაა და არა კლასი, მასში `inject()`-ის
 გამოყენებაც შეგვიძლია — ის injection context-ში ეშვება:
 
