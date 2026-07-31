@@ -15,17 +15,14 @@ rxjs-ს თავისი ალტერნატივა აქვს. ე�
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
 
@@ -46,17 +43,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Subscription, fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
 
@@ -109,17 +103,14 @@ myObservable.subscribe({
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Subscription, fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
   mySubscription$!: Subscription;
@@ -153,17 +144,14 @@ subscription-ის ინსტანცია შეიძლება მა�
 
 ```ts
 import { Component, OnDestroy, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Subscription, fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class App implements OnInit, OnDestroy {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
   mySubscription$!: Subscription;

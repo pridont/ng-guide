@@ -5,29 +5,27 @@ title: "ჩაშენებული ვალიდატორები"
 # ჩაშენებული ვალიდატორები
 
 ჯერ განვიხილოთ ანგულარში არსებული ვალიდატორები. ჩვენი პროექტი ასე გამოიყურება:
-გვაქვს შექმნილი SignupFormComponent, სადაც გვაქვს მარტივი კონტროლების ჯგუფი,
+გვაქვს შექმნილი SignupForm, სადაც გვაქვს მარტივი კონტროლების ჯგუფი,
 რომელიც დაკავშირებულია თემფლეითთან.
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { ReactiveFormsModule, FormBuilder } from "@angular/forms";
 
 @Component({
   selector: "app-signup-form",
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./signup-form.component.html",
-  styleUrls: "./signup-form.component.css",
+  imports: [ReactiveFormsModule],
+  templateUrl: "./signup-form.html",
+  styleUrl: "./signup-form.css",
 })
-export class SignupFormComponent {
+export class SignupForm {
+  private fb = inject(FormBuilder);
+
   signupForm = this.fb.group({
     name: [""],
     email: [""],
     password: [""],
   });
-
-  constructor(private fb: FormBuilder) {}
 
   onSubmit() {
     console.log(this.signupForm.value);

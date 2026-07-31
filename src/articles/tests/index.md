@@ -30,12 +30,28 @@ unit ტესტები ამოწმებენ კოდის ბლო
 განცალკევებულია აპლიკაციის კოდისგან. ამ თავში გავეცნობით unit ტესტებს
 ანგულარში.
 
-## Jasmine & Karma
+## Vitest
 
-ანგულარი იყენებს Jasmine ბიბლიოთეკას იუნით ტესტებისთვის. ეს ბიბლიოთეკა გვთავაზობს
-ფუნქციების რეპერტუარს, რომლითაც ტესტების დაწერა შეგვიძლია. ანგულარი ასევე იყენებს
-Karma-ს, რაც Jasmine-ზე დაშენებული პროგრამაა, რომელიც ტესტების შედეგს ბრაუზერში
-გვიჩვენებს.
+ანგულარის ახალი პროექტები [Vitest](https://vitest.dev)-ს იყენებენ.
+ის ანგულარის მე-21 ვერსიიდან სტანდარტული ტესტ-რანერია და CLI-ის მიერ
+შექმნილ პროექტს თავიდანვე მოყვება — არაფრის დამატებით დაინსტალირება არ გვჭირდება.
+
+Vitest ტესტებს **Node.js-ში** უშვებს, ხოლო ბრაუზერის DOM-ს `jsdom`
+ბიბლიოთეკით ასიმულირებს. ეს იმას ნიშნავს, რომ ტესტების გასაშვებად
+ბრაუზერი არ იხსნება — შედეგებს პირდაპირ ტერმინალში ვნახავთ. ბრაუზერის
+გაშვების ხარჯის გამოკლებით ტესტები საგრძნობლად სწრაფად ეშვება.
+
+**შენიშვნა:** ძველ პროექტებში Jasmine + Karma-ს წყვილს შეხვდებით.
+Karma ტესტების შედეგს ბრაუზერში აჩვენებდა. ის კვლავ მხარდაჭერილია,
+მაგრამ ახალ პროექტებში აღარ გამოიყენება. კარგი ამბავი ის არის, რომ
+ტესტების **დაწერის სინტაქსი** პრაქტიკულად იგივეა — Vitest იმავე
+`describe`/`it`/`expect` API-ს გვთავაზობს, ამიტომ ამ თავში ნასწავლი
+ორივე შემთხვევაში გამოგადგებათ. არსებული პროექტის გადასაყვანად
+არსებობს სქემატიკა:
+
+```sh
+ng g @schematics/angular:refactor-jasmine-vitest
+```
 
 ## Component Unit Tests
 
@@ -43,127 +59,188 @@ unit ტესტების ჩატარება შესაძლებ�
 ტესტები ამოწმებს, ერთი მხრივ, კომპონენტის კლასში ლოგიკას, ხოლო მეორე მხრივ,
 კომპონენტის თემფლეითში გარკვეულ პატერნებს.
 
-კომპონენტების დასატესტად უნდა შევქმნათ იმავე კომპონენტის სახელის მქონდე ფაილი
+კომპონენტების დასატესტად უნდა შევქმნათ იმავე კომპონენტის სახელის მქონე ფაილი
 \+ `spec.ts`. ასეთი ფაილები CLI-ით შექმნილ კომპონენტებს ავტომატურად მოყვება.
 `spec` იმიტომ, რომ ტესტის ფაილი ასევე ერთგვარი სპეციფიკაციის ფაილია. ანუ
 ასეთ ფაილებში აღვწერთ როგორ უნდა მუშაობდეს კომპონენტი.
 
-შევხედოთ ანგულარის CLI-ით შექმნილ აპლიკაციაში წინასწარ გამზადებულ `app.component.spec.ts`
-ფაილს.
+ვთქვათ, გვაქვს ასეთი კომპონენტი `app.ts`-ში:
 
 ```ts
-import { TestBed } from "@angular/core/testing";
-import { AppComponent } from "./app.component";
+import { Component, signal } from "@angular/core";
 
-describe("AppComponent", () => {
+@Component({
+  selector: "app-root",
+  template: `<h1>{{ title() }}</h1>`,
+})
+export class App {
+  title = signal("my-app");
+}
+```
+
+შევხედოთ მის გვერდით არსებულ `app.spec.ts` ფაილს:
+
+```ts
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { App } from "./app";
+
+describe("App", () => {
+  let component: App;
+  let fixture: ComponentFixture<App>;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [AppComponent],
+      imports: [App],
     }).compileComponents();
+
+    fixture = TestBed.createComponent(App);
+    component = fixture.componentInstance;
+    await fixture.whenStable();
   });
 
   it("should create the app", () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
+    expect(component).toBeTruthy();
   });
 
-  it(`should have as title 'tests'`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual("tests");
+  it(`should have as title 'my-app'`, () => {
+    expect(component.title()).toEqual("my-app");
   });
 
   it("should render title", () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector(".content span")?.textContent).toContain(
-      "tests app is running!"
-    );
+    expect(compiled.querySelector("h1")?.textContent).toContain("my-app");
   });
 });
 ```
 
 აქ გვაქვს ერთი დიდი `describe` ფუნქცია. ეს ფუნქცია თავს უყრის ერთი კონკრეტული
-კოდის მონაკვეთისთვის განკუთვნილ ტესტებს, ამ შემთხვევაში `AppComponent`-ისთვის.
+კოდის მონაკვეთისთვის განკუთვნილ ტესტებს, ამ შემთხვევაში `App`-ისთვის.
 პირველ არგუმენტად ამ ფუნქციას ვაწვდით სტრინგს, რასაც შეიძლება ჰქონდეს ნებისმიერი
-მნიშვნელობა. როცა Karma-ს გავხსნით, ამ `describe`-ში არსებული ტესტების ბლოკი
-ერთად იქნება შეკრული `AppComponent` სახელის ქვეშ. `describe`-ის ქოლბექში ვწერთ
+მნიშვნელობა. ტესტების გაშვებისას ამ `describe`-ში არსებული ტესტების ბლოკი
+ერთად იქნება შეკრული `App` სახელის ქვეშ. `describe`-ის ქოლბექში ვწერთ
 ამ ცალკეულ ტესტებს `it` ფუნქციებით.
 
 `it` ფუნქციებში აღვწერთ კომპონენტის შესახებ კონკრეტულ მოლოდინებს, ანუ რას
 უნდა აკეთებდეს კომპონენტი. ეს აღწერა ეძლევა მას პირველ არგუმენტად, ხოლო ქოლბექში
 იწერება კოდი, რომელიც ამ მოლოდინს ამოწმებს.
 
-`beforeEach` არის ფუნქცია, რომელიც ყოველი ჩვენს მიწოდებულ ქოლბექს გააქტიურებს ყოველი
-`it` ფუნქციისთვის. აქ საჭიროა რომ ანგულარის `TestBed`-ს დახმარებით წინასწარ
+`beforeEach` არის ფუნქცია, რომელიც ჩვენს მიწოდებულ ქოლბექს გააქტიურებს ყოველი
+`it` ფუნქციისთვის. აქ საჭიროა რომ ანგულარის `TestBed`-ის დახმარებით წინასწარ
 დავაქომფაილოთ კომპონენტი, რათა მასზე წვდომა გვქონდეს ტესტირების დროს.
 
-როგორც ხედავთ აქ წინასწარ გვაქვს 3 სპეციფიკაცია. ყოველ სპეციფიკაციაში `TestBed`-ის
-დახმარებით ვიღებთ სასურველი კომპონენტის ინსტაციას და Jasmine-ის ფუნქციებს ვიყენებთ
-მის შესამოწმებლად.
+`imports`-ში ვწერთ სატესტ კომპონენტს, რადგან ის standalone-ია.
+(ძველ, `NgModule`-ზე დაფუძნებულ პროექტებში აქ `declarations` წერია.)
 
-`expect` ფუნქციას ვაწვდით იმ მონაცემს, რომლის რაღაც მნიშვნელობა თუ თვისება გინვდა
-რომ შევამოწმოთ და შემდეგ გვიბრუნდება `JasmineMatchers`-ის ინსტანცია, რომელზეც
-შესამოწმებელი მეთოდების დაძახება შეგვიძლია. `isTruethy` გულისხმობს არის თუ არა
+`expect` ფუნქციას ვაწვდით იმ მონაცემს, რომლის რაღაც მნიშვნელობა თუ თვისება გვინდა
+რომ შევამოწმოთ, და შემდეგ გვიბრუნდება ობიექტი, რომელზეც
+შესამოწმებელი მეთოდების დაძახება შეგვიძლია. `toBeTruthy` გულისხმობს არის თუ არა
 მნიშვნელობა ჭეშმარიტისებრი (ანუ ის არსებობს და არ არის null, undefined და ა.შ).
 
 მეორე ბლოკში ხდება კომპონენტის თვისების შემოწმება, მოლოდინია, რომ title
-იყოს `test`.
+იყოს `my-app`. ყურადღება მიაქციეთ, რომ `title` [სიგნალია](/signals/),
+ამიტომ ტესტშიც მას ფუნქციასავით ვეძახებთ: `component.title()`.
 
 ბოლო ბლოკში მოწმდება კომპონენტის თემფლეითი, სადაც DOM ელემენტს ვიღებთ
-და ვამოწმებთ შეიცავს თუ არა მოსალოდნელ სათაურს. ვინაიდან სათაური კომპონენტის
-თვისებიდან რენდერდება, ჯერ კომპონენტის fixture-ზე უნდა `detectChanges` მეთოდს
-დავუძახოთ რათა კომპონენტის თვისება თემფლეითში აისახოს (ამას აპლიკაციაში ანგულარი
-ავტომატურად აკეთებს, მაგრამ ტესტში ეს სპეციალურად უნდა გამოვიწვიოთ).
+და ვამოწმებთ შეიცავს თუ არა მოსალოდნელ სათაურს.
 
-ტესების გაშვება შესაძლებელია ბრძანებით:
+### `await fixture.whenStable()`
+
+ვინაიდან სათაური კომპონენტის თვისებიდან რენდერდება, ჯერ უნდა დავრწმუნდეთ,
+რომ ანგულარმა თემფლეითი განაახლა. ამისთვის `fixture`-ზე ვიძახებთ
+`whenStable()` მეთოდს და მას ველოდებით `await`-ით.
+აპლიკაციაში ამას ანგულარი ავტომატურად აკეთებს, მაგრამ ტესტში ეს
+სპეციალურად უნდა გამოვიწვიოთ.
+
+რადგან `whenStable()` `beforeEach`-შივე დაგვიძახია, თითოეული `it`
+ბლოკი უკვე დარენდერებულ კომპონენტს იღებს და შესაბამისად სინქრონული რჩება.
+
+**შენიშვნა:** ძველ სახელმძღვანელოებში ამის ნაცვლად `fixture.detectChanges()`
+შეგხვდებათ. ანგულარის 21-ე ვერსიიდან აპლიკაციები ნაგულისხმევად
+[zoneless](/signals/) რეჟიმში ეშვება და `await fixture.whenStable()`
+სწორი მიდგომაა — ის ასინქრონულ ოპერაციებსაც ითვალისწინებს, არა მხოლოდ
+change detection-ის ერთ ციკლს.
+
+## ტესტების გაშვება
+
+ტესტების გაშვება შესაძლებელია ბრძანებით:
 
 ```sh
 npm run test
 ```
 
-ეს გაუშვებს Jasmine-ს და გაგვიხსნის ბრაუზერით karma-ს, სადაც ვნახვთ, რომ ყველა ტესტი
-წარმატებულია. თუ კომპონენტის კლასში `title`-ს შეცვლით, ერთ-ერთი ტესტი ახლა
+ან
+
+```sh
+ng test
+```
+
+ტერმინალში დავინახავთ დაახლოებით ასეთ შედეგს:
+
+```
+ RUN  v4.1.10 /path/to/my-app
+
+ Test Files  1 passed (1)
+      Tests  3 passed (3)
+   Start at  15:54:48
+   Duration  352ms
+```
+
+ბრძანება ფაილებში ცვლილებებსაც ადევნებს თვალს — ფაილის შენახვისთანავე
+ტესტები ხელახლა გაეშვება. CI-ზე, სადაც ეს არ გვჭირდება, ერთჯერადი
+გაშვება ასე ხდება:
+
+```sh
+ng test --watch=false
+```
+
+თუ კომპონენტის კლასში `title`-ს შეცვლით, ერთ-ერთი ტესტი ახლა
 წარუმატებელი იქნება.
+
+## ჩვენი ტესტი
 
 დავწეროთ ჩვენი ტესტიც. ვთქვათ კომპონენტის კლასში გვინდა შემოვიტანოთ მეთოდი `changeTitle`,
 რომელიც სათაურს შეცვლის. მაშინ ჯერ დავწეროთ ჩვენი მოლოდინი:
 
 ```ts
-it("should change title with new value", () => {
-  const fixture = TestBed.createComponent(AppComponent);
-  const app = fixture.componentInstance;
-  app.changeTitle();
-  expect(app.title).toEqual("changed");
+it("should change title with new value", async () => {
+  component.changeTitle();
+  await fixture.whenStable();
+
+  expect(component.title()).toEqual("changed");
+
+  const compiled = fixture.nativeElement as HTMLElement;
+  expect(compiled.querySelector("h1")?.textContent).toContain("changed");
 });
 ```
 
-ავიღოთ კომპონენტის fixture და შევქმნათ ამ კომპონენტის ინსტანცია. კომპონენტზე
-დავუძახოთ `changeTitle`-ს და შემდეგ შევამოწმოთ, რომ ამ კლასის სათაური არის
-რაღაც ახალი მნიშვნელობა, მაგალითად `changed`.
+კომპონენტზე დავუძახოთ `changeTitle`-ს, დავიცადოთ განახლებას და შემდეგ შევამოწმოთ,
+რომ ამ კლასის სათაური არის რაღაც ახალი მნიშვნელობა, მაგალითად `changed`.
+აქვე თემფლეითშიც ვამოწმებთ, რომ ცვლილება რეალურად აისახა.
 
 ახლა ტესტი ჩავარდება, რადგან ეს მეთოდი არც კი არსებობს კომპონენტში, ამიტომ ის დავამატოთ:
 
 ```ts
-import { Component } from "@angular/core";
+import { Component, signal } from "@angular/core";
 
 @Component({
   selector: "app-root",
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  template: `<h1>{{ title() }}</h1>`,
 })
-export class AppComponent {
-  title = "tests";
+export class App {
+  title = signal("my-app");
 
   changeTitle() {
-    this.title = "changed";
+    this.title.set("changed");
   }
 }
 ```
 
 და ასე ახლა ტესტი წარმატებით ჩაივლის.
+
+ყურადღება მიაქციეთ, რომ ჯერ ტესტი დავწერეთ და მხოლოდ შემდეგ — კოდი.
+ამ მიდგომას Test-Driven Development (TDD) ჰქვია: ჯერ აღვწერთ, რა უნდა
+მოხდეს, ვხედავთ ტესტის ჩავარდნას, და მერე ვწერთ იმდენ კოდს, რამდენიც
+ტესტის გასამწვანებლად საკმარისია.
 
 ## შეჯამება
 
@@ -172,5 +249,6 @@ export class AppComponent {
 და ჩვენ მხოლოდ ზედაპირულად გავეცანით მის პრაქტიკას. მის შესახებ მეტის გასაგებად შეგიძლიათ
 გაეცნოთ შემდეგ რესურსებს:
 
-- [angular.io/guide/testing](https://angular.io/guide/testing)
+- [angular.dev/guide/testing](https://angular.dev/guide/testing)
+- [vitest.dev](https://vitest.dev)
 - [testing-angular.com](https://testing-angular.com/)

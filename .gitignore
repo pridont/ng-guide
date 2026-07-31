@@ -5,3 +5,4 @@ public/
 .wrangler/
 .dev.vars
 .dev.vars.*
+.temp/

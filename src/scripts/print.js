@@ -1,10 +1,15 @@
-import { themeSwitch } from "./theme.js";
+import { currentTheme, setTheme } from "./theme.js";
 
 export function listenToPrint() {
+  let restore = null;
+
   window.addEventListener("beforeprint", () => {
-    document.body.classList.add("light");
+    restore = currentTheme();
+    document.documentElement.dataset.theme = "light";
   });
+
   window.addEventListener("afterprint", () => {
-    themeSwitch();
+    if (restore) setTheme(restore);
+    restore = null;
   });
 }

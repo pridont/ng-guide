@@ -5,10 +5,13 @@ description: "ისწავლე Angular-ის ფუნდამენტ�
 permalink: "print.html"
 ---
 {%- for article in collections.sortedArticles -%}
-    <article>
+    <section class="chapter">
         {{ article.content | safe }}
-    </article>
+    </section>
 {%- endfor -%}
-<script>
+{# A module script is deferred, so `main.js` has attached its `beforeprint`
+   handler by the time this runs — a classic script fires during parsing and
+   the page prints in whatever theme is active. #}
+<script type="module">
     window.print();
 </script>

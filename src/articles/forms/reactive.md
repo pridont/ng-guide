@@ -16,17 +16,15 @@ title: "Reactive Forms"
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule, FormControl } from "@angular/forms";
 
 @Component({
   selector: "app-signup-form",
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./signup-form.component.html",
-  styleUrl: "./signup-form.component.css",
+  imports: [ReactiveFormsModule],
+  templateUrl: "./signup-form.html",
+  styleUrl: "./signup-form.css",
 })
-export class SignupFormComponent {
+export class SignupForm {
   name = new FormControl("");
 }
 ```
@@ -60,17 +58,15 @@ export class SignupFormComponent {
 
 ```ts
 import { Component, inject } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { ReactiveFormsModule, FormControl } from "@angular/forms";
 
 @Component({
   selector: "app-signup-form",
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: "./signup-form.component.html",
-  styleUrl: "./signup-form.component.css",
+  imports: [ReactiveFormsModule],
+  templateUrl: "./signup-form.html",
+  styleUrl: "./signup-form.css",
 })
-export class SignupFormComponent {
+export class SignupForm {
   private fb = inject(FormBuilder);
 
   signupForm = this.fb.group({
@@ -213,7 +209,7 @@ export class SignupFormComponent {
 გამოვიყენოთ, მაგრამ რადგან `FormBuilder` გვაქვს, მისი მეთოდი გამოვიყენოთ.
 
 ```ts
-export class SignupFormComponent {
+export class SignupForm {
   private fb = inject(FormBuilder);
 
   signupForm = this.fb.group({
@@ -263,18 +259,17 @@ export class SignupFormComponent {
     <h3>Positions</h3>
     <button type="button" (click)="addPosition()">+</button>
   </div>
-  <input
-    type="text"
-    *ngFor="let position of positions.controls; let i = index"
-    [formControlName]="i"
-  />
+  @for (position of positions.controls; track $index) {
+    <input type="text" [formControlName]="$index" />
+  }
 </div>
 ```
 
 გაითვალისწინეთ, რომ positions არის signupForm-ის წევრი. აქ `formArrayName`-ის საშუალებით
 რაიმე მშობელ კონტეინერზე სათანადო მასივის სახელს ვუთითებთ. ახლა ანგულარმა იცის, რომ
-ამ ბლოკში `positions` ველში არსებულ კონტროლებთან გვაქვს საქმე. ჩვენ `NgFor` დირექტივით
-ვლუპავთ პოზიციის კონტროლებზე და თითოეული პოზიციისთვის ვიღებთ ინდექსს, რომელსაც
+ამ ბლოკში `positions` ველში არსებულ კონტროლებთან გვაქვს საქმე. ჩვენ `@for` ბლოკით
+ვლუპავთ პოზიციის კონტროლებზე და თითოეული პოზიციისთვის ვიღებთ ინდექსს `$index`
+ცვლადში, რომელსაც
 ფროფერთი ბაინდინგით ვაკავშირებთ `formControlName`-ზე. `FormArray`-ში კონტროლის სახელი
 მასივის ინდექსია. + ღილაკზე დაჭერით ახალი კონტროლი იქმნება და შესაბამისად ახალი ველიც გამოჩნდება.
 მათი მნიშვნელობებს ქვემოთაც დავინახავთ, სადაც ფორმის მნიშვნელობას გამოვსახავთ.

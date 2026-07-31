@@ -11,19 +11,17 @@ title: "QueryParams"
 პროდუქტების სორტირების მიმართულება შევინახოთ QueryParams-ში.
 
 ჩვენ ფაქტობრივად წინა თავის იდენტური აპლიკაცია გვაქვს, თუმცა
-ყურადღებას მხოლოდ ერთ კომპონენტს მივაქცევთ: `ProductsComponent`
+ყურადღებას მხოლოდ ერთ კომპონენტს მივაქცევთ: `Products`
 რომელიც იყენებს `ProductsService`-ს რათა პროდუქტები განათავსოს სთეითში.
 
 სერვისში ინახება პროდუქტების მასივი, რომლებსაც გააჩნიათ აიდი, სახელი, აღწერა,
 სურათი და ფასი. აქვე არსებობს მეთოდი ამ პროდუქტების მისაღებად.
 
 ```ts
-import { Injectable } from "@angular/core";
+import { Service } from "@angular/core";
 import { Product } from "./product.model";
 
-@Injectable({
-  providedIn: "root",
-})
+@Service()
 export class ProductsService {
   private products: Product[] = [
     {
@@ -75,26 +73,24 @@ export interface Product {
 ```
 
 როუთინგი კონფიგურირებული გვაქვს, რომ თავიდანვე `/products` გვერდზე გადავიდეთ
-და გავხსნათ `ProductsComponent`. ეს კომპონენტი ასე გამოიყურება:
+და გავხსნათ `Products`. ეს კომპონენტი ასე გამოიყურება:
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { ProductsService } from "../products.service";
+import { Component, inject } from "@angular/core";
+import { ProductsService } from "../products-service";
 import { RouterLink } from "@angular/router";
 import { Product } from "../product.model";
 
 @Component({
   selector: "app-products",
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: "./products.component.html",
-  styleUrl: "./products.component.css",
+  imports: [RouterLink],
+  templateUrl: "./products.html",
+  styleUrl: "./products.css",
 })
-export class ProductsComponent {
-  products: Product[] = this.productsService.getAllProducts();
+export class Products {
+  private productsService = inject(ProductsService);
 
-  constructor(private productsService: ProductsService) {}
+  products: Product[] = this.productsService.getAllProducts();
 }
 ```
 
@@ -105,19 +101,21 @@ export class ProductsComponent {
 ```html
 <div class="container">
   <ul>
-    <li class="product" *ngFor="let product of products">
-      <h3>{{ product.name }}</h3>
-      <img [src]="product.image" [alt]="product.name" />
-      <p>{{ product.price | currency }}</p>
-      <a routerLink="/products/{{ product.id }}">Details</a>
-    </li>
+    @for (product of products; track product.id) {
+      <li class="product">
+        <h3>{{ product.name }}</h3>
+        <img [src]="product.image" [alt]="product.name" />
+        <p>{{ product.price | currency }}</p>
+        <a routerLink="/products/{{ product.id }}">Details</a>
+      </li>
+    }
   </ul>
 </div>
 ```
 
 ჩვენი მიზანია, რომ მომხმარებელს პროდუქტების გაფილტვრის საშუალება მივცეთ.
 
-`ProductsComponent`-ში დავამატოთ შემდეგი თვისებები:
+`Products`-ში დავამატოთ შემდეგი თვისებები:
 
 ```ts
   sortBy: 'cheapest' | 'expensive' = 'cheapest';
@@ -145,7 +143,7 @@ import { FormsModule } from "@angular/forms";
 `ngModelChange` არის ივენთი, რომელსაც ფორმის ელემენტი დააემითებს,
 როცა მასში მომხმარებელი რამეს შეცვლის. ამ დროს გვინდა `changeSort`
 მეთოდით რეაგირება, რომელსაც ტაიპსკრიპტის ნიმუშში ვნახავთ.
-`NgFor` დირექტივით
+`@for` ბლოკით
 სორტირების ვარიანტები განვათავსოთ და მათი მნიშვნელობები მივაბათ
 ელემენტს. ასევე ის ინტერპოლაციით გამოვსახოთ. დაკლიკებაზე უნდა
 გააქტიურდეს მეთოდი, რომლითაც სორტირება მოხდება.
@@ -158,17 +156,19 @@ import { FormsModule } from "@angular/forms";
     [ngModel]="sortBy"
     (ngModelChange)="changeSort($event)"
   >
-    <option *ngFor="let sortOption of sortOptions" [value]="sortOption">
-      {{ sortOption }}
-    </option>
+    @for (sortOption of sortOptions; track sortOption) {
+      <option [value]="sortOption">{{ sortOption }}</option>
+    }
   </select>
   <ul>
-    <li class="product" *ngFor="let product of products">
-      <h3>{{ product.name }}</h3>
-      <img [src]="product.image" [alt]="product.name" />
-      <p>{{ product.price | currency }}</p>
-      <a routerLink="/products/{{ product.id }}">Details</a>
-    </li>
+    @for (product of products; track product.id) {
+      <li class="product">
+        <h3>{{ product.name }}</h3>
+        <img [src]="product.image" [alt]="product.name" />
+        <p>{{ product.price | currency }}</p>
+        <a routerLink="/products/{{ product.id }}">Details</a>
+      </li>
+    }
   </ul>
 </div>
 ```
@@ -178,9 +178,8 @@ import { FormsModule } from "@angular/forms";
 მისამართში query პარამეტრები და ჩვენ შემდგომ მასზე უნდა ვირეაგიროთ.
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { ProductsService } from "../products.service";
+import { Component, inject } from "@angular/core";
+import { ProductsService } from "../products-service";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { Product } from "../product.model";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -188,21 +187,20 @@ import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "app-products",
-  standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
-  templateUrl: "./products.component.html",
-  styleUrl: "./products.component.css",
+  imports: [RouterLink, FormsModule],
+  templateUrl: "./products.html",
+  styleUrl: "./products.css",
 })
-export class ProductsComponent {
+export class Products {
+  private productsService = inject(ProductsService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
   sortBy: "cheapest" | "expensive" = "cheapest";
   sortOptions = ["cheapest", "expensive"];
   products: Product[] = [];
 
-  constructor(
-    private productsService: ProductsService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
+  constructor() {
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe((queryParams) => {
@@ -246,7 +244,7 @@ export class ProductsComponent {
 ვიყენებთ დაინჯექთებულ `ActivatedRoute`-ს, რათა დავასუბსქრაიბოთ მასში არსებულ
 `queryParams`-ზე. ჩვენ პროდუქტების სიას ვინახავთ ლოკალურ ცვლადში და ასევე
 `queryParams`-იდან ვიღებთ ქოლბექში ხელმისაწვდომ პარამეტრების ობიექტს.
-აქ ჩვენი შექმნილი პარამეტრის მნიშვნელობა შეგვიძლია ავიღოთ - `sortBy`.
+აქ ჩვენი შექმნილი პარამეტრის მნიშვნელობა შეგვიძლია ავიღოთ — `sortBy`.
 ჩვენ ამ სორტირების ვარიანტს კლასის თვისებაში ვანახლებთ, რათა
 გვერდის დარეფრეშებაზე ფორმაში ისევ სწორი ვარიანტი იყოს არჩეული.
 რაც მთავარია, ახლა სორტირების მიმართულების მიხედვით ვასორტირებთ

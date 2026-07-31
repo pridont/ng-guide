@@ -1,29 +1,35 @@
-const btn = document.querySelector("#theme-switch");
-const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-const currentTheme = localStorage.getItem("theme") || prefersDarkScheme;
+const root = document.documentElement;
 
-// Initializes color theme switch handler
-export async function themeSwitch() {
-  if (currentTheme === "light") {
-    setTheme("light");
-  } else {
-    setTheme("dark");
-  }
-
-  btn.addEventListener("click", function () {
-    document.body.classList.add("bg-transition");
-    if (document.body.classList.contains("light")) {
-      setTheme("dark");
-    } else {
-      setTheme("light");
-    }
-  });
+export function currentTheme() {
+  return root.dataset.theme === "light" ? "light" : "dark";
 }
 
-function setTheme(theme) {
-  theme === "light"
-    ? document.body.classList.add("light")
-    : document.body.classList.remove("light");
-  btn.innerHTML = document.querySelector(`#icon-${theme}`).innerHTML;
-  localStorage.setItem("theme", theme);
+export function setTheme(theme) {
+  root.dataset.theme = theme;
+  try {
+    localStorage.setItem("theme", theme);
+  } catch (e) {
+    /* private mode — the in-memory theme still applies */
+  }
+  paintButton(theme);
+}
+
+function paintButton(theme) {
+  const btn = document.querySelector("#theme-switch");
+  const icon = document.querySelector(`#icon-${theme}`);
+  if (!btn || !icon) return;
+  btn.replaceChildren(icon.content.cloneNode(true));
+  btn.setAttribute("aria-pressed", String(theme === "light"));
+}
+
+/** Wires the header toggle. The stored theme is applied earlier, in <head>. */
+export function themeSwitch() {
+  const btn = document.querySelector("#theme-switch");
+  paintButton(currentTheme());
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    document.body.classList.add("bg-transition");
+    setTheme(currentTheme() === "light" ? "dark" : "light");
+  });
 }

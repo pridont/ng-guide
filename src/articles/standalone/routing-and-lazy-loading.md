@@ -1,71 +1,86 @@
 ---
-title: "Routing"
+title: "Routing & Lazy-loading"
 ---
 
-# Routing
+# Routing & Lazy-loading
 
-Standalone სისტემაში შემოტანილია რაუთერის გამარტივებული API.
-ახლა შესაძლებელია რაიმე რაუთების შექმნა ცალკე ფაილში:
+`NgModule`-ების გარეშე რაუთერს გამარტივებული API აქვს.
+რაუთების შექმნა ცალკე ფაილში ხდება:
 
 ```ts
-export const ROUTES: Route[] = [
-  { path: "admin", component: AdminPanelComponent },
+import { Routes } from "@angular/router";
+import { AdminPanel } from "./admin/admin-panel";
+
+export const routes: Routes = [
+  { path: "admin", component: AdminPanel },
   // ... other routes
 ];
 ```
 
-და მისი დამატება main.ts-ში `bootstrapApplication`-ის კონფიგურაციაში, კერძოდ
-providers მასივში `provideRouter` ფუნქციის დახმარებით:
+CLI-ით შექმნილ პროექტში ეს ფაილი `app.routes.ts`-ია. მისი დარეგისტრირება
+`app.config.ts`-ში, პროვაიდერების მასივში ხდება, `provideRouter` ფუნქციით:
 
 ```ts
-import { ROUTES } from "./app/admin/admin.routes.ts";
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from "@angular/core";
+import { provideRouter } from "@angular/router";
+import { routes } from "./app.routes";
 
-bootstrapApplication(AppComponent, {
+export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter([ROUTES]),
-    // ...
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes),
   ],
-});
+};
 ```
+
+**შენიშვნა:** ძველ მასალაში `provideRouter`-ის დაძახებას პირდაპირ
+`main.ts`-ში, `bootstrapApplication`-ის მეორე არგუმენტში ნახავთ. ეს კვლავ
+მუშაობს, მაგრამ CLI დღეს კონფიგურაციას ცალკე `app.config.ts` ფაილში
+გამოყოფს, რაც უფრო სუფთაა.
 
 ## Lazy-loading
 
-შესაძლებელია რაუთების "ზარმაცად" ჩატვირთვაც. ამისთვის გამოიყენება `loadComponent`:
+შესაძლებელია რაუთების "ზარმაცად" ჩატვირთვაც — ანუ კომპონენტის კოდი
+ბრაუზერში მხოლოდ მაშინ ჩამოიტვირთება, როცა მომხმარებელი ამ მისამართზე
+გადავა. ამისთვის `component`-ის ნაცვლად `loadComponent` გამოიყენება:
 
 ```ts
-export const ROUTES: Route[] = [
+export const routes: Routes = [
   {
     path: "admin",
     loadComponent: () =>
-      import("./admin/panel.component").then((mod) => mod.AdminPanelComponent),
+      import("./admin/admin-panel").then((mod) => mod.AdminPanel),
   },
   // ...
 ];
 ```
 
-თუ რამდენიმე რაუთის "ზარმაცად" ჩატვირთვა გვინდა, შეგვიძლია ცალკე რაუთების
+თუ რამდენიმე რაუთის ერთად "ზარმაცად" ჩატვირთვა გვინდა, შეგვიძლია ცალკე რაუთების
 ფაილის დაიმპორტება `loadChildren`-ით:
 
 ```ts
-// In the main application:
-export const ROUTES: Route[] = [
+// მთავარ აპლიკაციაში:
+export const routes: Routes = [
   {
     path: "admin",
-    loadChildren: () =>
-      import("./admin/routes").then((mod) => mod.ADMIN_ROUTES),
+    loadChildren: () => import("./admin/admin.routes").then((mod) => mod.adminRoutes),
   },
-  // ...
-];
-
-// In admin/routes.ts:
-export const ADMIN_ROUTES: Route[] = [
-  { path: "home", component: AdminHomeComponent },
-  { path: "users", component: AdminUsersComponent },
   // ...
 ];
 ```
 
-ეს მეთოდი მხოლოდ მაშინ მუშაობს, როცა ყველა ჩატვირთული კომპონენტი არის standalone.
+```ts
+// admin/admin.routes.ts:
+import { Routes } from "@angular/router";
+import { AdminHome } from "./admin-home";
+import { AdminUsers } from "./admin-users";
+
+export const adminRoutes: Routes = [
+  { path: "home", component: AdminHome },
+  { path: "users", component: AdminUsers },
+  // ...
+];
+```
 
 ## რაუთების ჯგუფისთვის სერვისის მიწოდება
 
@@ -73,13 +88,13 @@ export const ADMIN_ROUTES: Route[] = [
 ფუნქციონირებდეს, ეს შეგვიძლია რაუთების სიაშივე გავაკეთოთ, `providers` თვისებით:
 
 ```ts
-export const ROUTES: Route[] = [
+export const routes: Routes = [
   {
     path: "admin",
     providers: [AdminService, { provide: ADMIN_API_KEY, useValue: "12345" }],
     children: [
-      { path: "users", component: AdminUsersComponent },
-      { path: "teams", component: AdminTeamsComponent },
+      { path: "users", component: AdminUsers },
+      { path: "teams", component: AdminTeams },
     ],
   },
   // ... other application routes that don't
@@ -88,4 +103,7 @@ export const ROUTES: Route[] = [
 ```
 
 აქ `admin` რაუთსა და მის შვილებს (`children`-ში არსებულ რაუთებს) წვდომა აქვთ
-`AdminService`-სა და `ADMIN_API_KEY`-ზე.
+`AdminService`-სა და `ADMIN_API_KEY`-ზე. აპლიკაციის დანარჩენ ნაწილს — არა.
+
+ეს კარგად ერწყმის lazy-loading-ს: `admin` სექციის სერვისი მაშინ იქმნება,
+როცა მომხმარებელი ამ სექციაში შედის, და არა აპლიკაციის გაშვებისთანავე.

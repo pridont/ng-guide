@@ -6,26 +6,24 @@ title: "DI-ს გარეშე"
 
 ამის გაკეთების ერთი ვარიანტი არის
 `Input` და `Output` დეკორატორების გამოყენება, სადაც ლოგიკის ძირითად
-ნაწილს AppComponent-ში შევინახავდით, და ეს ორი კომპონენტი უბრალოდ ინფორმაციას
+ნაწილს App-ში შევინახავდით, და ეს ორი კომპონენტი უბრალოდ ინფორმაციას
 გამოსახავდა და ივენთებს დააემითებდა. ეს კარგი მიდგომაა, როცა კომპონენტები
 პრიმიტიულია: ჩვენ მძიმე ლოგიკა მშობელი კომპონენტებიდან უნდა მოვაგვაროთ,
 მათ უბრალოდ ვიზუალებსა და მონაცემების განთავსებაზე უნდა იზრუნონ.
 
 ასეთი მიდგომით კოდი შემდეგნაირი იქნებოდა:
 
-app.component.ts
+app.ts
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { Hero } from "./types/hero";
-import { HeroListComponent } from "./hero-list.component";
-import { HeroDetailsComponent } from "./hero-details.component";
+import { HeroList } from "./hero-list";
+import { HeroDetails } from "./hero-details";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, HeroListComponent, HeroDetailsComponent],
+  imports: [HeroList, HeroDetails],
   template: `
     <div class="container">
       <app-hero-list
@@ -51,7 +49,7 @@ import { HeroDetailsComponent } from "./hero-details.component";
     `,
   ],
 })
-export class AppComponent {
+export class App {
   heroes: Hero[] = [
     {
       name: "Tariel",
@@ -84,27 +82,24 @@ export class AppComponent {
 გმირების შესახებ ინფორმაციის შენახვა, არჩეული გმირის სტატუსი და გმირის არჩევის ლოგიკა
 არის მშობელ კომპონენტში.
 
-`HeroListComponent` უბრალოდ იღებს განსათავსებელი გმირების სიას
-და თუ რომელიმე გმირზე დავაკლიკეთ, ამ ივენთს აემითებს, რათა `AppComponent` მა
+`HeroList` უბრალოდ იღებს განსათავსებელი გმირების სიას
+და თუ რომელიმე გმირზე დავაკლიკეთ, ამ ივენთს აემითებს, რათა `App` მა
 `onHeroPicked` მეთოდი გააქტიუროს და `pickedHero` შეცვალოს.
 
-hero-list.component.ts
+hero-list.ts
 
 ```ts
-import { Component, EventEmitter, Input, Output } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, input, output } from "@angular/core";
 import { Hero } from "../types/hero";
 
 @Component({
   selector: "app-hero-list",
-  standalone: true,
-  imports: [CommonModule],
   template: `
     <h2>Pick the hero</h2>
     <ul>
-      <li *ngFor="let hero of heroes" (click)="heroPicked.emit(hero.name)">
-        {{ hero.name }}
-      </li>
+      @for (hero of heroes(); track hero.name) {
+        <li (click)="heroPicked.emit(hero.name)">{{ hero.name }}</li>
+      }
     </ul>
   `,
   styles: [
@@ -118,36 +113,35 @@ import { Hero } from "../types/hero";
     `,
   ],
 })
-export class HeroListComponent {
-  @Input() heroes!: Hero[];
-  @Output() heroPicked = new EventEmitter<string>();
+export class HeroList {
+  heroes = input.required<Hero[]>();
+  heroPicked = output<string>();
 }
 ```
 
 როცა `pickedHero` იცვლება, ვინაიდან ის property binding-ით არის მიბმული
-HeroDetailsComponent-ის hero თვისებაზე, მაშინ ამ უკანასკნელ კომპონენტში
+HeroDetails-ის hero თვისებაზე, მაშინ ამ უკანასკნელ კომპონენტში
 განთავსებული დეტალებიც იცვლება.
 
-hero-details.component.ts
+hero-details.ts
 
 ```ts
-import { Component, Input, OnChanges, SimpleChanges } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, input } from "@angular/core";
 import { Hero } from "../types/hero";
 
 @Component({
   selector: "app-hero-details",
-  standalone: true,
-  imports: [CommonModule],
   template: `
-    <div *ngIf="hero">
-      <h2>{{ hero.name }}</h2>
-      <p>{{ hero.description }}</p>
-    </div>
+    @if (hero(); as pickedHero) {
+      <div>
+        <h2>{{ pickedHero.name }}</h2>
+        <p>{{ pickedHero.description }}</p>
+      </div>
+    }
   `,
 })
-export class HeroDetailsComponent {
-  @Input() hero!: Hero;
+export class HeroDetails {
+  hero = input.required<Hero>();
 }
 ```
 

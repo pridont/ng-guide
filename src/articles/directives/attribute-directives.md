@@ -4,80 +4,72 @@ title: "Attribute Directives"
 
 # Attribute Directives
 
-ატრიბუტის დირექტივებ HTML ელემენტსა და კომპონენტებს უცვლიან ქცევას, თვისებებსა და ატრიბუტებს.
-ანგულარის ბევრ მოდულში (მაგ. `RouterModule`, `FormsModule`) არსებობს წინასწარ შექმნილი დირექტივები.
-ამ თავში განვიხილავთ ატრიბუტის დირექტივებს: `NgClass`, და `NgModel`.
+ატრიბუტის დირექტივები HTML ელემენტსა და კომპონენტებს უცვლიან ქცევას, თვისებებსა და ატრიბუტებს.
+ანგულარის ბევრ პაკეტში (მაგ. `@angular/router`, `@angular/forms`) არსებობს წინასწარ შექმნილი დირექტივები.
+ამ თავში განვიხილავთ კლასების დინამიურ მინიჭებასა და `NgModel` დირექტივს.
 
-## NgClass
+## კლასების დინამიური მინიჭება
 
-`NgClass`-ის საშუალებით ელემენტზე ერთდროულად რამდენიმე კლასის დამატება ან მოშორება შეგვიძლია.
+ელემენტზე ერთდროულად რამდენიმე კლასის დამატება ან მოშორება `[class]` ბაინდინგით შეგვიძლია.
+ეს ანგულარის ჩაშენებული სინტაქსია — მისთვის არაფრის დაიმპორტება არ არის საჭირო.
 
-ეს დირექტივი, ისევე როგორც ბევრი სხვა, `CommonModule`-ის ნაწილს წარმოადგენენ, შესაბამისად ის უნდა დაიმპორტებული გვქონდეს
-სათანადო კომპონენტში.
-
-```ts
-import { CommonModule } from "@angular/core";
-
-@Component({
-  /* ... */
-  standalone: true,
-  imports: [CommonModule],
-})
-export class AppComponent {}
-```
-
-`NgClass`-ის პრიმიტიული მაგალითი:
+უმარტივესი მაგალითი:
 
 ```html
-<h1 [ngClass]="isSpecial ? 'special' : '' ">I love Angular</h1>
+<h1 [class]="isSpecial ? 'special' : '' ">I love Angular</h1>
 ```
 
 აქ ternary ლოგიკური ოპერაციით, იმის მიხედვით isSpecial არის თუ არა ჭეშმარიტი,
 დავაბრუნებთ `special` სტრინგს ან ცარიელ სტრინგს, რომელიც `h1`-ს მიენიჭება.
 
-შეგვიძლია `NgClass`-ს მივაწოდოთ ჯავასკრიპტის ობიექტიც, სადაც ობიექტის key
+შეგვიძლია `[class]`-ს მივაწოდოთ ჯავასკრიპტის ობიექტიც, სადაც ობიექტის key
 იქნება კლასის სახელი, ხოლო key-ს მნიშვნელობა იქნება ჭეშმარიტი ან მცდარი,
 რაც იმას განსაზღვრავს, key-ში მითითებული კლასი ელემენტს უნდა მიენიჭოს თუ არა:
 
 ```html
-<h1 [ngClass]="{special: isSpecial, interesting: isInteresting}">
+<h1 [class]="{special: isSpecial, interesting: isInteresting}">
   I love Angular
 </h1>
 ```
 
 აქ `isSpecial` და `isInteresting` ცვლადებია, რომლებიც კლასში უნდა არსებობდნენ.
+ერთი კონკრეტული კლასის ჩართვა-გამორთვა კიდევ უფრო მოკლედ იწერება:
 
-აღსანიშნავია, რომ უშუალოდ ამ დირექტივის კლასის დაიმპორტებაც შეგვიძლია,
-მთლიანი მოდულების მაგივრად, თუკი `CommonModule`-დან მხოლოდ ეს კლასი გვჭირდება
-და მეტი არაფერი.
-
-```ts
-import { NgClass } from "@angular/common";
-
-@Component({
-  imports: [NgClass]
-})
-export class AppComponent
+```html
+<h1 [class.special]="isSpecial">I love Angular</h1>
 ```
 
-გაითვალისწინეთ, რომ ეს შესაძლებელია მხოლოდ standalone ტიპის დირექტივებზე (მაგ. `NgModel`
-არ არის standalone).
+იგივე პრინციპი მუშაობს სტილებზეც, `[style]` ბაინდინგით:
+
+```html
+<p [style]="{color: textColor, 'font-size.px': size}">Hello</p>
+<p [style.color]="textColor">Hello</p>
+```
+
+**შენიშვნა:** ძველ კოდში ამის ნაცვლად `NgClass` და `NgStyle` დირექტივები
+გხვდებათ (`[ngClass]`, `[ngStyle]`), რომლებიც `@angular/common`-იდან უნდა
+დაგვეიმპორტებინა. ისინი კვლავ მუშაობს, მაგრამ ახალ კოდში `[class]` და
+`[style]` ბაინდინგებია რეკომენდირებული. არსებული პროექტის ავტომატურად
+გადასაყვანად არსებობს სქემატიკები:
+
+```sh
+ng generate @angular/core:ngclass-to-class
+ng generate @angular/core:ngstyle-to-style
+```
 
 ## NgModel
 
-`NgModel` დირექტივი არის `FormsModule`-ის ნაწილი, რომელიც ჩვენ საჭირო მოდულში
-უნდა დავაიმპორტოთ. ამ შემთხვევაში მათ ვაიმპორტებთ `app.module.ts`-ში:
+`NgModel` დირექტივი არის `FormsModule`-ის ნაწილი, რომელიც კომპონენტში
+უნდა დავაიმპორტოთ:
 
 ```ts
-import { CommonModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 
 @Component({
   /* ... */
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
 })
-export class AppComponent {}
+export class App {}
 ```
 
 `NgModel` ფორმის ელემენტებზე გამოიყენება two way binding-ით.
@@ -98,8 +90,8 @@ title.
 
 ## შეჯამება
 
-ამ თავში ჩვენ განვიხილეთ `NgClass` და `NgModel` ატრიბუტ დირექტივები.
-`NgClass` ელემენტს უცვლის კლასს გარკვეული პირობების მიხედვით, ხოლო
+ამ თავში ჩვენ განვიხილეთ `[class]`/`[style]` ბაინდინგები და `NgModel` დირექტივი.
+`[class]` ელემენტს უცვლის კლასს გარკვეული პირობების მიხედვით, ხოლო
 `NgModel` input ელემენტზე თავსდება two way binding-ით, რაც საშუალებას
 გვაძლევს, რომ ფორმის ელემენტებს ინფორმაცია გადავცეთ და მათგან
 ავიღოთ მომხმარებლის მიერ შეყვანილი ინფორმაცია.

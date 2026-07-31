@@ -2,7 +2,7 @@
 title: "ანგულარის ქართული გზამკვლევი"
 ---
 
-<img src="./assets/ng-logo.png" id="ng-landing-logo" alt="Angular logo" style="max-width: 200px; display: block; margin: 1rem auto 0 auto;" />
+<img src="./assets/angular.svg" id="ng-landing-logo" alt="Angular logo" style="max-width: 200px; margin: 1rem auto 0 auto;" />
 
 # ანგულარის ქართული გზამკვლევი
 
@@ -33,9 +33,8 @@ title: "ანგულარის ქართული გზამკვლ�
 
 წიგნი შექმნილია [ფრიდონ თეთრაძის](https://pridontetradze.com) მიერ.
 
-ამ საიტის მასალა ეყრდნობა ანგულარის ოფიციალურ დოკუმენტაციებს:
+ამ საიტის მასალა ეყრდნობა ანგულარის ოფიციალურ დოკუმენტაციას:
 
-- [angular.io](https://angular.io)
 - [angular.dev](https://angular.dev)
 
 <div style="text-align: center; margin-top: 100px;">

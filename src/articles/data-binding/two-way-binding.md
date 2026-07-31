@@ -15,25 +15,23 @@ Two way binding გულისხმობს property binding-ისა და
 ng g c sizer
 ```
 
-sizer კომპონენტი მარტივი პრინციპით იმუშავებს. ის მშობელისგან მიიღებს საწყის ფონტის ზომას
-(`@Input() size`),
-ხოლო თვითონ, ღილაკზე დაჭერის საფუძველზე ამ ფონტის ზომას გაზრდის და ისე გადასცემს მშობელს
-(`@Output() sizeChange`).
+sizer კომპონენტი მარტივი პრინციპით იმუშავებს. ის მშობლისგან მიიღებს საწყისი ფონტის ზომას,
+ხოლო თვითონ, ღილაკზე დაჭერის საფუძველზე, ამ ფონტის ზომას შეცვლის და ისე გადასცემს მშობელს.
+
+ჯერ ვნახოთ, როგორ კეთდება ეს [`input()`-ითა და `output()`-ით](./input-output.html),
+რომლებიც წინა თავში განვიხილეთ:
 
 ```ts
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, input, output } from "@angular/core";
 
 @Component({
   selector: "app-sizer",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./sizer.component.html",
-  styleUrl: "./sizer.component.css",
+  templateUrl: "./sizer.html",
+  styleUrl: "./sizer.css",
 })
-export class SizerComponent {
-  @Input() size!: number | string;
-  @Output() sizeChange = new EventEmitter<number>();
+export class Sizer {
+  size = input.required<number>();
+  sizeChange = output<number>();
 
   dec() {
     this.resize(-1);
@@ -44,8 +42,8 @@ export class SizerComponent {
 
   resize(delta: number) {
     // Keep size only between 40px and 8px
-    this.size = Math.min(40, Math.max(8, +this.size + delta));
-    this.sizeChange.emit(this.size);
+    const newSize = Math.min(40, Math.max(8, this.size() + delta));
+    this.sizeChange.emit(newSize);
   }
 }
 ```
@@ -59,20 +57,24 @@ export class SizerComponent {
 <div>
   <button type="button" (click)="dec()" title="smaller">-</button>
   <button type="button" (click)="inc()" title="bigger">+</button>
-  <span [style.font-size.px]="size">FontSize: {{size}}px</span>
+  <span [style.font-size.px]="size()">FontSize: {{ size() }}px</span>
 </div>
 ```
 
+ყურადღება მიაქციეთ, რომ `size`-ს **ვერ ვცვლით** კომპონენტის შიგნით —
+`input()` მხოლოდ წასაკითხია. ჩვენ მხოლოდ ახალ მნიშვნელობას ვაემითებთ,
+ხოლო რეალურ ცვლილებას მშობელი ახორციელებს.
+
 სანიმუშო ტექსტი, რომელიც ზომას შეიცვლის ამ sizer კომპონენტშიც გვექნება (`span`).
-ახლა app.component.html-ში შეგვიძლია განვათავსოთ sizer კომპონენტი და გამოვიყენოთ
+ახლა app.html-ში შეგვიძლია განვათავსოთ sizer კომპონენტი და გამოვიყენოთ
 მასზე ჩვენთვის ცნობილი ბაინდინგები:
 
 ```html
-<app-sizer [size]="fontSizePx" (sizeChange)="fontSizePx = $event"></app-sizer>
+<app-sizer [size]="fontSizePx" (sizeChange)="fontSizePx = $event" />
 <div [style.font-size.px]="fontSizePx">Resizable Text</div>
 ```
 
-ამ მშობელი კომპონენტის კლასში ჩვენ გვაქვს ფროფერთი `fontSizePx`,
+ამ მშობელი კომპონენტის კლასში ჩვენ გვაქვს თვისება `fontSizePx`,
 რომელსაც ვიყენებთ ტექსტისთვის ზომის მისანიჭებლად ქვედა `div`-ზე,
 და რომელსაც ასევე გადავცემთ `app-sizer` კომპონენტს.
 
@@ -82,42 +84,107 @@ fontSizePx = 16;
 
 ახლა ფონტის ზომა უნდა იცვლებოდეს. აპლიკაციაში შემდეგი რამ ხდება:
 
-- თავდაპირველად, როცა აპლიკაცია იტვირთება, `AppComponent`-ში არსებული `fontSizePx`
-  გადაეცემა `SizerComponent`, რომელიც ინიციალიზაციისას სწორედ მის მნიშვნელობას შეინახავს
-  `size` თვისებაში. სწორედ ამ ზომას გამოსახავს ეს კომპონენტი.
-- `SizerComponent`-ში ღილაკზე დაჭერით გააქტიურდება `dec` ან `inc` მეთოდი, რომელიც `resize` მეთოდს
-  დაუძახებს და შეცვლის ფონტის ზომას, ამასთანავე დააემითებს ამ ახალ ზომას.
-- ახალ დაემითებულ ზომას `AppComponent` ივენთ ბაინდინგის საშუალებით დააფიქსირებს და შეცვლის თავის
-  ფროფერთის `fontSizePx` რათა მან ეს ახალი მნიშვნელობა მიიღოს.
-- შედეგად იცვლება `AppComponent`-ის თემფლეითში არსებული ტექსტის ზომა.
+- თავდაპირველად, როცა აპლიკაცია იტვირთება, `App`-ში არსებული `fontSizePx`
+  გადაეცემა `Sizer`-ს, რომელიც სწორედ მის მნიშვნელობას წაიკითხავს
+  `size` სიგნალიდან. სწორედ ამ ზომას გამოსახავს ეს კომპონენტი.
+- `Sizer`-ში ღილაკზე დაჭერით გააქტიურდება `dec` ან `inc` მეთოდი, რომელიც `resize` მეთოდს
+  დაუძახებს და დააემითებს ახალ ზომას.
+- ახალ დაემითებულ ზომას `App` ივენთ ბაინდინგის საშუალებით დააფიქსირებს და შეცვლის თავის
+  თვისებას `fontSizePx`, რათა მან ეს ახალი მნიშვნელობა მიიღოს.
+- შედეგად იცვლება `App`-ის თემფლეითში არსებული ტექსტის ზომა.
+
+## შემოკლებული სინტაქსი
 
 ამ ბაინდინგის შესამოკლებლად ანგულარში შექმნეს შემდეგნაირი სინტაქსი:
 
 ```html
-<app-sizer [(size)]="fontSizePx"></app-sizer>
+<app-sizer [(size)]="fontSizePx" />
 <div [style.font-size.px]="fontSizePx">Resizable Text</div>
 ```
 
 რაც ზუსტად იგივეს აკეთებს. ჩვენ ერთდროულად ვუსმენთ ცვლილებას და ვაწვდით კონკრეტულ მნიშვნელობას.
-სწორედ ეს არის two way binding. ეს შესაძლებელია მხოლოდ იმ შემთხვევასი, თუ იმ კომპონენტში, რომელზეც
-ჩვენ ბაინდინგს ვაკეთებთ `Input`-ისა და `Output` თვისებების სახელები კონკრეტული კონვენციითაა შექმნილი:
-`Output` თვისება უნდა იწყებოდეს `Input` თვისების დასახელებით და ბოლოში უნდა ემატებოდეს `Change`.
+სწორედ ეს არის two way binding. მას ხუმრობით "banana in a box"-ს უწოდებენ —
+`[()]` სინტაქსის გამო.
+
+ეს შესაძლებელია მხოლოდ იმ შემთხვევაში, თუ იმ კომპონენტში, რომელზეც
+ჩვენ ბაინდინგს ვაკეთებთ, input-ისა და output-ის სახელები კონკრეტული კონვენციითაა შექმნილი:
+output უნდა იწყებოდეს input-ის დასახელებით და ბოლოში უნდა ემატებოდეს `Change`.
 
 ```ts
-@Input() size!: number | string;
-@Output() sizeChange = new EventEmitter<number>();
+size = input.required<number>();
+sizeChange = output<number>();
 ```
 
 two way binding-ით ჩვენ ანგულარს ერთდროულად ვეუბნებით, რომ:
 
-- size თვისებამ `SizerComponent`-ში ის მნიშვნელობა უნდა მიიღოს, რაც `fontSizePx`-ს აქვს.
-- `fontSizePx`-მა `AppComponent`-ში ის მნიშვნელობა უნდა მიიღოს, რასაც `sizeChange` ივენთი დააემითებს.
+- size თვისებამ `Sizer`-ში ის მნიშვნელობა უნდა მიიღოს, რაც `fontSizePx`-ს აქვს.
+- `fontSizePx`-მა `App`-ში ის მნიშვნელობა უნდა მიიღოს, რასაც `sizeChange` ივენთი დააემითებს.
+
+## `model()` — ერთი სიგნალი ორივესთვის
+
+ორი ცალკეული თვისების (`size` და `sizeChange`) წერა და მათი სახელების
+კონვენციის დაცვა მოსაბეზრებელია. ანგულარს აქვს `model()` ფუნქცია,
+რომელიც ორივეს ერთდროულად ქმნის:
+
+```ts
+import { Component, model } from "@angular/core";
+
+@Component({
+  selector: "app-sizer",
+  templateUrl: "./sizer.html",
+  styleUrl: "./sizer.css",
+})
+export class Sizer {
+  size = model.required<number>();
+
+  dec() {
+    this.resize(-1);
+  }
+  inc() {
+    this.resize(+1);
+  }
+
+  resize(delta: number) {
+    // Keep size only between 40px and 8px
+    this.size.update((current) => Math.min(40, Math.max(8, current + delta)));
+  }
+}
+```
+
+მთელი კომპონენტის კოდი დაპატარავდა. `model()` აბრუნებს `ModelSignal`-ს, რომელიც
+`input()`-ისგან განსხვავებით **მოდიფიცირებადია** — მასზე გვაქვს `set` და
+`update` მეთოდები, ისევე როგორც ჩვეულებრივ სიგნალზე.
+
+როცა `model`-ის მნიშვნელობას შევცვლით, ანგულარი მშობელს **ავტომატურად
+შეატყობინებს** — `emit`-ის ჩვენით დაძახება არ გვჭირდება. სწორედ ამიტომ
+`resize` მეთოდში `sizeChange.emit(...)` აღარ არის: `this.size.update(...)`
+ორივე საქმეს აკეთებს.
+
+მშობლის მხარეს არაფერი იცვლება — იგივე `[(size)]` მუშაობს:
+
+```html
+<app-sizer [(size)]="fontSizePx" />
+```
+
+`model()`-საც შეიძლება საწყისი მნიშვნელობა მივცეთ, ან სავალდებულო გავხადოთ:
+
+```ts
+size = model(16); // ModelSignal<number>, საწყისი 16
+size = model.required<number>(); // მშობელმა აუცილებლად უნდა მიაწოდოს
+```
+
+`model()`-ს იმ შემთხვევაში ვიყენებთ, როცა შვილ კომპონენტს **მართლა სჭირდება**
+მნიშვნელობის შეცვლა. თუ შვილი მხოლოდ კითხულობს, `input()` უკეთესი არჩევანია.
 
 ## შეჯამება
 
 ამ თავში განვიხილეთ two way binding რომელიც საშუალებას გვაძლევს ერთდროულად მონაცემები გადავცეთ
 შვილ კომპონენტს და ამასთანავე ეს მონაცემები შევცვალოთ შვილი კომპონენტისგან დაემითებული მნიშვნელობებით.
-two way binding იშვიათად გამოიყენება, თუმცა მისი საჭიროება შედარებით უფრო ხშირად ფორმების შემთხვევაში ჩნდება.
-ამისთვის ანგულარში არსებობს `ngModel` დირექტივი, რომელიც two way binding-ით გამოიყენება.
-მის შესახებ ინფორმაცია ხელმისაწვდიომია
-[ოფიციალურ დოკუმენტაციაში](https://angular.io/guide/built-in-directives#displaying-and-updating-properties-with-ngmodel).
+ეს კეთდება ან `input()` + `output()` წყვილით (სადაც output-ის სახელს `Change` ბოლოსართი
+სჭირდება), ან — უფრო მოკლედ — `model()` ფუნქციით, რომელიც ორივეს ერთდროულად ქმნის
+და მოდიფიცირებად სიგნალს გვაძლევს.
+
+two way binding შედარებით უფრო ხშირად ფორმების შემთხვევაში გამოიყენება.
+ამისთვის ანგულარში არსებობს `ngModel` დირექტივი, რომელიც two way binding-ით გამოიყენება. თუმცა ამ დირექტივის მოვალეობა აწი `model()` ფუნქციამ აითვისა.
+მის შესახებ ინფორმაცია ხელმისაწვდომია
+[ოფიციალურ დოკუმენტაციაში](https://angular.dev/guide/templates/two-way-binding).

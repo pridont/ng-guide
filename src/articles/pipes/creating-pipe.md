@@ -11,16 +11,13 @@ title: "ფაიფის შექმნა"
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrl: "./app.component.css",
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   filterKey = "";
   items = [
     "Some example text here",
@@ -32,7 +29,7 @@ export class AppComponent {
 }
 ```
 
-თემფლეითში ეს მნიშვნელობები გამოსახული გვაქვს `NgIf` დირექტივით.
+თემფლეითში ეს მნიშვნელობები `@for` ბლოკით გამოგვაქვს.
 ასევე `NgModel` დირექტივის საშუალებით `filtlerKey` ში ვნახავთ ყოველ
 ახალ ტექსტს, რომელსაც მომხმარებელი `input`-ში შეიყვანს:
 
@@ -40,11 +37,13 @@ export class AppComponent {
 <p>filter</p>
 <input type="text" [(ngModel)]="filterKey" />
 <hr />
-<p *ngFor="let item of items">{{ item }}</p>
+@for (item of items; track item) {
+  <p>{{ item }}</p>
+}
 ```
 
 როგორღაც, შეცვლილი `filterKey`-ს მიხედვით უნდა შევცვალოთ
-`NgFor` დირექტივით დარენდერებული სია. სწორედ ამისთვის გამოგვადგება ფაიფი.
+`@for` ბლოკით დარენდერებული სია. სწორედ ამისთვის გამოგვადგება ფაიფი.
 
 შევქმნათ ფაიფი, რომელიც ტექსტის მასივს გაფილტრავს ჩვენ მიერ მიწოდებული
 საძიებო სიტყვის მიხედვით. ფაიფის შექმნა შეიძლება ხელით, ან ანგულარის
@@ -54,7 +53,7 @@ CLI-ს დახმარებით.
 ng generate pipe my-filter
 ```
 
-ანგულარი შექმნის ფაილს, რომელიც შეიცავს ჩვენი ფაიფის სახელს + `.pipe.ts`.
+ანგულარი შექმნის ფაილს, რომელიც შეიცავს ჩვენი ფაიფის სახელს + `-pipe.ts`.
 ამ ფაილში დაექსpორტებულია ჩვენი ფაიფის კლასი, რომელიც `Pipe` დეკორატორით
 არის შექმნილი. ამ დეკორატორში შეგვიძლია ფაიფის კონფიგურაცია, მათ შორის იმ
 სახელის, რომლითაც ამ ფაიფს თემფლეითში გამოვიყენებთ. ჩვენი ფაიფის კლასი
@@ -68,7 +67,6 @@ import { Pipe, PipeTransform } from "@angular/core";
 
 @Pipe({
   name: "myFilter",
-  standalone: true,
 })
 export class MyFilterPipe implements PipeTransform {
   transform(value: string[], filterKey: string): string[] {
@@ -90,14 +88,13 @@ export class MyFilterPipe implements PipeTransform {
 
 ```ts
 /* ... */
-import { MyFilterPipe } from "./my-filter.pipe";
+import { MyFilterPipe } from "./my-filter-pipe";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, MyFilterPipe],
+  imports: [MyFilterPipe],
 })
-export class AppComponent {
+export class App {
   /* ... */
 }
 ```
@@ -108,7 +105,9 @@ export class AppComponent {
 <p>filter</p>
 <input type="text" [(ngModel)]="filterKey" />
 <hr />
-<p *ngFor="let item of items | myFilter : filterKey">{{ item }}</p>
+@for (item of items | myFilter : filterKey; track item) {
+  <p>{{ item }}</p>
+}
 ```
 
 ჩვენი ფილტრის filter ფუნქციაში value არგუმენტი გამოდის items მასივი,
@@ -120,4 +119,8 @@ export class AppComponent {
 ## შეჯამება
 
 ამ თავში ჩვენ შევქმენით ფილტრის ფაიფი, რომლითაც ტექსტის მასივი გავფილტრეთ
-`NgIf` დირექტივში, `input` ველში შეყვანილი ტექსტის მიხედვით.
+`@for` ბლოკში, `input` ველში შეყვანილი ტექსტის მიხედვით.
+
+---
+
+თემფლეითების თავი აქ სრულდება. შემდეგ [დირექტივებს](/directives/) გავეცნობით.

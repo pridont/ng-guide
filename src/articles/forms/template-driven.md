@@ -4,13 +4,13 @@ title: "Template Driven Forms"
 
 # Template Driven Forms
 
-### მნიშვნელოვანი დირექტივები
+## მნიშვნელოვანი დირექტივები
 
 template-driven ფორმები ეყრდნობიან `FormsModule`-ში არსებულ შემდეგ დირექტივებს:
 
-- `NgModel` - იგი ათანხმებს ჰოსტ ფორმის ელემენში შეცვლილ მნიშვნელობებს დატა მოდელთან, რაც საშუალებას გვაძლევს, რომ ვირეაგიროთ შეყვანილ ინფორმაციაზე.
-- `NgForm` - ქმნის ზედა დონის `FormGroup`-ის ინსტანციას და მას `<form>` ელემენტს აბამს, რათა თვალყური ადევნოს გაერთიანებული ფორმის მნიშვნელობასა და ვალიდაციის სტატუსს. როგორც კი ჩვენ `FormsModule`-ს ვაიმპორტებთ, ეს დირექტივი ავტომატურად აქტიურდება ყველა `<form>` ელემენტზე.
-- `NgModelGroup` - ქმნის და აბამს `FormGroup`-ის ინსტანციას DOM ელემენტს.
+- `NgModel` — იგი ათანხმებს ჰოსტ ფორმის ელემენში შეცვლილ მნიშვნელობებს დატა მოდელთან, რაც საშუალებას გვაძლევს, რომ ვირეაგიროთ შეყვანილ ინფორმაციაზე.
+- `NgForm` — ქმნის ზედა დონის `FormGroup`-ის ინსტანციას და მას `<form>` ელემენტს აბამს, რათა თვალყური ადევნოს გაერთიანებული ფორმის მნიშვნელობასა და ვალიდაციის სტატუსს. როგორც კი ჩვენ `FormsModule`-ს ვაიმპორტებთ, ეს დირექტივი ავტომატურად აქტიურდება ყველა `<form>` ელემენტზე.
+- `NgModelGroup` — ქმნის და აბამს `FormGroup`-ის ინსტანციას DOM ელემენტს.
 
 აუცილებელია `FormsModule`-ის დაიმპორტება საჭირო კომპონენტში (ან მოდულში), რათა ამ დირექტივებზე წვდომა გვქონდეს.
 
@@ -22,7 +22,7 @@ template-driven ფორმები ეყრდნობიან `FormsModul
 
 ### მარტივი ფორმა
 
-შევქმნათ კომპონენტი HeroFormComponent და მის თემფლეითში ავაგოთ მარტივი ფორმა:
+შევქმნათ კომპონენტი HeroForm და მის თემფლეითში ავაგოთ მარტივი ფორმა:
 
 ```html
 <form>
@@ -41,16 +41,16 @@ template-driven ფორმები ეყრდნობიან `FormsModul
   <div class="form-group">
     <label for="friend">Friend</label>
     <select id="friend" name="friend">
-      <option *ngFor="let friend of friends" [value]="friend">
-        {{ friend }}
-      </option>
+      @for (friend of friends; track friend) {
+        <option [value]="friend">{{ friend }}</option>
+      }
     </select>
   </div>
 </form>
 ```
 
 ეს სტანდარტული ფორმის მარკაპია, უბრალოდ `select`-ში ვიყენებთ
-`NgFor` დირექტივს რათა ასარჩევი მეგობრების სია გამოვსახოთ,
+`@for` ბლოკს რათა ასარჩევი მეგობრების სია გამოვსახოთ,
 მათი მნიშვნელობები მივანიჭოთ value თვისებაზე და ასევე ეს
 მნიშვნელობა გამოვსახოთ ინტერპოლაციით.
 
@@ -58,17 +58,15 @@ template-driven ფორმები ეყრდნობიან `FormsModul
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
 
 @Component({
   selector: "app-hero-form",
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: "./hero-form.component.html",
-  styleUrl: "./hero-form.component.css",
+  imports: [FormsModule],
+  templateUrl: "./hero-form.html",
+  styleUrl: "./hero-form.css",
 })
-export class HeroFormComponent {
+export class HeroForm {
   friends = ["Tariel", "Avtandil", "Nuradin-Pridon"];
   heroData = {
     name: "",
@@ -106,27 +104,31 @@ export class HeroFormComponent {
   <div class="form-group">
     <label for="email">Email</label>
     <input type="email" id="email" name="email" [(ngModel)]="heroData.email" />
-    <span *ngIf="emailCtrl.invalid && !emailCtrl.pristine"
-      >Email is required!</span
-    >
+    @if (emailCtrl.invalid && !emailCtrl.pristine) {
+      <span>Email is required!</span>
+    }
   </div>
 
   <div class="form-group">
     <label for="friend">Friend</label>
     <select id="friend" name="friend" [(ngModel)]="heroData.friend">
-      <option *ngFor="let friend of friends" [value]="friend">
-        {{ friend }}
-      </option>
+      @for (friend of friends; track friend) {
+        <option [value]="friend">{{ friend }}</option>
+      }
     </select>
-    <span *ngIf="friendCtrl.invalid">You shouldn't go alone!</span>
+    @if (friendCtrl.invalid) {
+      <span>You shouldn't go alone!</span>
+    }
   </div>
   <button>Submit</button>
 </form>
 
-<div *ngIf="submitted">
-  <h3>OUTPUT:</h3>
-  <div>{{ heroData | json }}</div>
-</div>
+@if (submitted) {
+  <div>
+    <h3>OUTPUT:</h3>
+    <div>{{ heroData | json }}</div>
+  </div>
+}
 ```
 
 ახლა ღილაკზე დაჭერისას უნდა გამოჩნდეს შედეგი, რაც ადასტურებს იმას, რომ
@@ -153,9 +155,9 @@ export class HeroFormComponent {
       required
       #nameCtrl="ngModel"
     />
-    <span *ngIf="nameCtrl.invalid && !nameCtrl.pristine"
-      >Name is required!</span
-    >
+    @if (nameCtrl.invalid && !nameCtrl.pristine) {
+      <span>Name is required!</span>
+    }
   </div>
   <div class="form-group">
     <label for="email">Email</label>
@@ -168,9 +170,9 @@ export class HeroFormComponent {
       email
       #emailCtrl="ngModel"
     />
-    <span *ngIf="emailCtrl.invalid && !emailCtrl.pristine"
-      >Email is required!</span
-    >
+    @if (emailCtrl.invalid && !emailCtrl.pristine) {
+      <span>Email is required!</span>
+    }
   </div>
   <div class="form-group">
     <label for="friend">Friend</label>
@@ -181,22 +183,26 @@ export class HeroFormComponent {
       required
       #friendCtrl="ngModel"
     >
-      <option *ngFor="let friend of friends" [value]="friend">
-        {{ friend }}
-      </option>
+      @for (friend of friends; track friend) {
+        <option [value]="friend">{{ friend }}</option>
+      }
     </select>
-    <span *ngIf="friendCtrl.invalid">You shouldn't go alone!</span>
+    @if (friendCtrl.invalid) {
+      <span>You shouldn't go alone!</span>
+    }
   </div>
   <button [disabled]="heroForm.invalid">Submit</button>
 </form>
 
-<div *ngIf="submitted">
-  <h3>OUTPUT:</h3>
-  <div>{{ heroData | json }}</div>
-</div>
+@if (submitted) {
+  <div>
+    <h3>OUTPUT:</h3>
+    <div>{{ heroData | json }}</div>
+  </div>
+}
 ```
 
-მივყვეთ ზემოდან ქვემოთ. ჩვენ ლოკალურ ცვლადს ვქმნით #-ით - `heroForm`, რომელსაც
+მივყვეთ ზემოდან ქვემოთ. ჩვენ ლოკალურ ცვლადს ვქმნით #-ით — `heroForm`, რომელსაც
 `ngForm` დირექტივს ვუტოლებთ. ასე თემფლეითში იქმნება ცვლადი, რომელიც `FormGroup`-ის
 ინსტანციას ინახავს. ღილაკს სწორედ ამ ცვლადში არსებული `invalid` თვისების მიხედვით
 ვთიშავთ. ფორმის ჯგუფი არავალიდურია მაშინ, თუ მასში ერთი კონტროლი მაინც არ არის ვალიდური.
@@ -216,7 +222,7 @@ export class HeroFormComponent {
 იმელის ველზე email ატრიბუტის მინიჭება `ngModel`-ს ანიშნებს, რომ ამ ველში მეილის პატერნი უნდა იყოს,
 და სანამ ეს პატერნი არ დაფიქსირდება, ფორმა არავალიდური იქნება.
 
-### შეჯამება
+## შეჯამება
 
 ამ თავში ჩვენ გამოვიყენეთ template-driven ფორმები მარტივი ფორმის შესაქმნელად, რომელსაც გააჩნია
 ვალიდაცია: იმის მიხედვით, არის თუ არა შევსებული ველი, ჩვენ ღილაკს ვაუქმებთ, ან ვაჩვენებთ მინიშნებებს.

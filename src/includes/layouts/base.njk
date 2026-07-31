@@ -1,22 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    {% include "head.njk" %}
-</head>
-<body>
-    {% include "svg.njk" %}
-    {% include "header.njk" %}
-    {% include "search-dialog.njk" %}
-    <div class="main-container">
-        <div class="radiance-container">
-           {% include "sidenav.njk" %}
-             <main>
-                 <article data-pagefind-body>
-                    {{ content | safe }} 
-                 </article>
-                {% include "footer.njk" %}
-             </main>
-        </div>
-    </div>
+<html lang="ka" data-theme="dark">
+{% include "head.njk" %}
+<body data-nav="open">
+  {% include "svg.njk" %}
+  {% include "header.njk" %}
+  {% include "search-dialog.njk" %}
+
+  <button class="scrim" id="nav-scrim" type="button" tabindex="-1" aria-label="სარჩევის დახურვა"></button>
+
+  <div class="shell">
+    {% include "sidenav.njk" %}
+
+    {% set nav = page | bookNav %}
+    {% set updated = page.inputPath | updatedOn %}
+
+    <main class="doc">
+      {% if nav %}
+        <nav class="crumbs" aria-label="მდებარეობა">
+          <span>{{ nav.section }}</span>
+          {%- for crumb in nav.trail %}
+            <span>/</span>
+            <a href="{{ crumb.url }}">{{ crumb.title }}</a>
+          {%- endfor %}
+          <span>/</span>
+          <span class="crumbs__current">{{ nav.title }}</span>
+        </nav>
+
+        <h1 class="doc__title">{{ title }}</h1>
+
+        {% if description %}
+          <p class="doc__lead">{{ description }}</p>
+        {% endif %}
+
+        {% if nav.chapterLabel or updated %}
+          <div class="doc__meta">
+            {% if nav.chapterLabel %}
+              <span>თავი {{ nav.chapterLabel }} · გვერდი {{ nav.pageLabel }}</span>
+            {% endif %}
+            {% if updated %}
+              <span>განახლდა {{ updated }}</span>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <hr class="doc__rule">
+      {% endif %}
+
+      <article class="prose" data-pagefind-body>
+        {% if nav %}{{ content | stripTitle | safe }}{% else %}{{ content | safe }}{% endif %}
+      </article>
+
+      {% if nav and (nav.prev or nav.next) %}
+        <nav class="pagenav" aria-label="გვერდების ნავიგაცია">
+          {% if nav.prev %}
+            <a class="pagenav__card pagenav__card--prev" href="{{ nav.prev.url }}">
+              <span class="pagenav__dir">&larr; წინა</span>
+              <span class="pagenav__title">{{ nav.prev.title }}</span>
+            </a>
+          {% endif %}
+          {% if nav.next %}
+            <a class="pagenav__card pagenav__card--next" href="{{ nav.next.url }}">
+              <span class="pagenav__dir">შემდეგი &rarr;</span>
+              <span class="pagenav__title">{{ nav.next.title }}</span>
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    </main>
+
+    {% include "toc.njk" %}
+  </div>
+
+  {% include "footer.njk" %}
 </body>
 </html>

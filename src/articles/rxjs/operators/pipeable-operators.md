@@ -25,17 +25,14 @@ someObservable = source.pipe(/* operators go here */);
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent, map } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // Create an observable that emits mousemove events
   mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
 
@@ -86,17 +83,14 @@ export class AppComponent implements OnInit {
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent, map } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   // Create an observable that emits mousemove events
   mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
 
@@ -139,17 +133,14 @@ export class AppComponent {
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent, map, tap } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   // Create a observable that emits mousemove events
   mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
 
@@ -197,17 +188,14 @@ export class AppComponent {
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent, map, tap, filter } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent {
+export class App {
   // Create an observable that emits mousemove events
   mouseMove$ = fromEvent<MouseEvent>(document, "mousemove");
 
@@ -250,11 +238,11 @@ HTTP მოთხოვნა გავაგზავნოთ, რომელ
 რაუთები:
 
 ```ts
-import { ProductsComponent } from "./products/products.component";
+import { Products } from "./products/products";
 import { Routes } from "@angular/router";
 
 export const routes: Routes = [
-  { path: "products/:id", component: ProductsComponent },
+  { path: "products/:id", component: Products },
 ];
 ```
 
@@ -270,7 +258,7 @@ export const appConfig: ApplicationConfig = {
   providers: [/* ... */ provideHttpClient()],
 ```
 
-`AppComponent`-ში მოვათავსოთ აუთლეტი არ დაგავიწყდეთ `RouterOutlet`-ის დამატება
+`App`-ში მოვათავსოთ აუთლეტი არ დაგავიწყდეთ `RouterOutlet`-ის დამატება
 კომპონენტის იმპორტებში:
 
 ```html
@@ -278,27 +266,26 @@ export const appConfig: ApplicationConfig = {
 <router-outlet></router-outlet>
 ```
 
-და მივხედოთ `ProductsComponent`-ს:
+და მივხედოთ `Products`-ს:
 
 ```ts
-import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
+import { Component, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { ActivatedRoute } from "@angular/router";
 import { switchMap } from "rxjs";
 
 @Component({
   selector: "app-products",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./products.component.html",
-  styleUrls: ["./products.component.css"],
+  templateUrl: "./products.html",
+  styleUrl: "./products.css",
 })
-export class ProductsComponent {
+export class Products {
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+
   product$ = this.route.params.pipe(
     switchMap((params) => this.getProductById(params["id"]))
   );
-  constructor(private http: HttpClient, private route: ActivatedRoute) {}
 
   getProductById(id: string) {
     return this.http.get<{ title: string; description: string; price: string }>(
@@ -329,14 +316,16 @@ export class ProductsComponent {
 თემფლეითში ახლა შეგვიძლია `async` ფაიფით მისი გამოსახვა:
 
 ```html
-<div *ngIf="product$ | async as product">
-  <h1>{{ product.title }}</h1>
-  <p>{{ product.description }}</p>
-  <p>{{ product.price }}</p>
-</div>
+@if (product$ | async; as product) {
+  <div>
+    <h1>{{ product.title }}</h1>
+    <p>{{ product.description }}</p>
+    <p>{{ product.price }}</p>
+  </div>
+}
 ```
 
-ჩვენ `async` ფაიფი შეგვიძლია `ngIf` დირექტივშიც გამოვიყენოთ. შესაბამისად
+ჩვენ `async` ფაიფი შეგვიძლია `@if` ბლოკშიც გამოვიყენოთ. შესაბამისად
 ეს ბლოკი მაშინ გამოჩნდება, როცა სტრიმი შედეგს დააბრუნებს, ანუ როცა http
 მოთხოვნაზე პასუხს მივიღებთ. `as product` არის ანგულარის მეთოდი, რომ
 ამოვიღოთ სტრიმის დაბრუნებული მნიშვნელობა, როგორც ლოკალური ცვლადი
@@ -357,8 +346,10 @@ export class ProductsComponent {
 ```ts
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 /* ... */
-export class AppComponent {
-  constructor(private route: ActivatedRoute) {
+export class App {
+  private route = inject(ActivatedRoute);
+
+  constructor() {
     this.route.params
       .pipe(takeUntilDestroyed())
       .subscribe((params) => console.log(params));
@@ -366,11 +357,12 @@ export class AppComponent {
 }
 ```
 
-ეს ოპერატორი არგუმენტების გარეშე იმუშავებს მხოლოდ კონსტრუქტორის შიგნით,
-რადგან იქ პირდაპირ ხელმისაწვდომია კომპონენტის `DestroyRef`, სხვა შემთხვევაში
-ის ჩვენით უნდა მივაწოდოთ ამ ოპერატორს.
+ეს ოპერატორი არგუმენტების გარეშე იმუშავებს მხოლოდ ე.წ injection context-ში —
+ანუ კონსტრუქტორში ან კლასის თვისების ინიციალიზაციისას — რადგან იქ პირდაპირ
+ხელმისაწვდომია კომპონენტის `DestroyRef`. სხვა შემთხვევაში ის ჩვენით უნდა
+მივაწოდოთ ამ ოპერატორს.
 
-### შეჯამება
+## შეჯამება
 
 ამ თავში ჩვენ განვიხილეთ ფაიფის ოპერატორები, რომლებითაც შესაძლებელია
 სტრიმების ბევრნაირად მოდიფიკაცია. ეს არის ყველაზე გამოყენებადი ოპერატორები,

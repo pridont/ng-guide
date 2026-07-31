@@ -1,24 +1,53 @@
 body {
   --pagefind-ui-scale: 0.8;
-  --pagefind-ui-primary: var(--green-dark);
-  --pagefind-ui-text: var(--fg-dark);
-  --pagefind-ui-background: var(--bg-dark);
-  --pagefind-ui-border: var(--gray-dark);
-  --pagefind-ui-tag: #eeeeee;
+  --pagefind-ui-primary: var(--accent);
+  --pagefind-ui-text: var(--fg);
+  --pagefind-ui-background: var(--bg);
+  --pagefind-ui-border: var(--rule-strong);
+  --pagefind-ui-tag: var(--panel);
   --pagefind-ui-border-width: 1px;
   --pagefind-ui-border-radius: 8px;
   --pagefind-ui-image-border-radius: 8px;
   --pagefind-ui-image-box-ratio: 3 / 2;
-  --pagefind-ui-font: var(--font-default);
+  --pagefind-ui-font: var(--font-sans);
 }
 
-.light {
-  --pagefind-ui-primary: var(--green-light);
-  --pagefind-ui-text: var(--fg-light);
-  --pagefind-ui-background: var(--bg-light);
-  --pagefind-ui-border: var(--gray-light);
+.search-dialog__inner {
+  max-width: 46rem;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.search-dialog__hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pagefind-ui__search-input {
+  background: var(--panel);
 }
 
 .pagefind-ui__search-input:focus {
-  border-color: var(--bg-dark-lifted);
+  border-color: var(--accent);
+}
+
+.pagefind-ui__result {
+  border-top: 1px solid var(--rule);
+}
+
+.pagefind-ui__result-title a {
+  color: var(--fg);
+}
+
+.pagefind-ui__result-title a:hover {
+  color: var(--accent);
+}
+
+.pagefind-ui__result-excerpt {
+  color: var(--muted);
 }

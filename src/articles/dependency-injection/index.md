@@ -11,5 +11,5 @@ Dependency Injection, იგივე DI, არის ფუნდამენ�
 
 ამ თავში ვისწავლით:
 
-- [DI-ს ზოგად პრინციპებს](./di-in-general.html) - TypeScript-ის მაგალითებით;
+- [DI-ს ზოგად პრინციპებს](./di-in-general.html) — TypeScript-ის მაგალითებით;
 - შემდეგ [DI-ს ანგულარში](./di-in-angular/).

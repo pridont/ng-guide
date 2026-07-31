@@ -12,13 +12,10 @@ title: "Property & Attribute Binding"
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
+  templateUrl: "./app.html",
   styles: `
     div {
       transition: background 500ms ease;
@@ -36,9 +33,9 @@ import { CommonModule } from "@angular/common";
   `,
   ,
 })
-export class AppComponent {
+export class App {
   imgData = {
-    src: "https://angular.io/assets/images/logos/angular/angular.svg",
+    src: "https://angular.dev/assets/images/press-kit/angular_wordmark_gradient.png",
     alt: "Angular Logo",
   };
   btnDisabled = true;
@@ -90,9 +87,9 @@ myBgColor = "violet";
 
 აუცილებელია ხაზი გავუსვათ იმას, რომ ჩვენ ახლა განვიხილავთ property binding-ს და
 არა attribute binding-ს. ამ ორს შორის მნიშვნელოვანი განსხვავებაა. როცა ჩვენ
-HTML-ში ერთი შეხედვით ელემენტის ატრიბუტებს ვუწერთ მნიშვნელობას - იქნება ეს binding-ით თუ
-მის გარეშე - ანგულარი პირდაპირ ამ HTML ელემენტს არ განათავსებს დოკუმენტში. იგი
-ინიციალიზაციას უკეთებს DOM-ის ნოუდებს, და მათ ანიჭებს ფროფერთიებს - ანუ HTML-ში
+HTML-ში ერთი შეხედვით ელემენტის ატრიბუტებს ვუწერთ მნიშვნელობას — იქნება ეს binding-ით თუ
+მის გარეშე — ანგულარი პირდაპირ ამ HTML ელემენტს არ განათავსებს დოკუმენტში. იგი
+ინიციალიზაციას უკეთებს DOM-ის ნოუდებს, და მათ ანიჭებს ფროფერთიებს — ანუ HTML-ში
 ატრიბუტზე ტექსტსა და მისი DOM-ის ნოუდის ანალოგურ ფროფერთის შეიძლება ზოგჯერ ერთი
 და იგივე მნიშვნელობები არ ჰქონდეთ.
 

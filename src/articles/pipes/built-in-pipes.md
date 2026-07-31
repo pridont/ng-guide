@@ -5,8 +5,18 @@ title: "ჩაშენებული ფაიფები"
 # ჩაშენებული ფაიფები
 
 გავეცნოთ ანგულარში ჩაშენებულ ძირითად და ყველაზე გამოყენებად ფაიფებს.
-წინამდებარე ფაიფები `CommonModule`-ის ნაწილია, ამიტომ ის დააიმპორტეთ
-თქვენ კომპონენტში.
+თითოეული მათგანი `@angular/common`-ის ნაწილია და კომპონენტის `imports`-ში
+ცალკე უნდა დაემატოს მხოლოდ ის, რასაც რეალურად იყენებთ:
+
+```ts
+import { DatePipe, CurrencyPipe } from "@angular/common";
+
+@Component({
+  /* ... */
+  imports: [DatePipe, CurrencyPipe],
+})
+export class App {}
+```
 
 ## DatePipe
 

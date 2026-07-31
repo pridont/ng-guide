@@ -19,18 +19,16 @@ export interface Hero {
 }
 ```
 
-ჩვენი AppComponent ასე გამოიყურება:
+ჩვენი App ასე გამოიყურება:
 
 ```ts
 import { Component } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { HeroListComponent } from "./hero-list.component";
-import { HeroDetailsComponent } from "./hero-details.component";
+import { HeroList } from "./hero-list";
+import { HeroDetails } from "./hero-details";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule, HeroListComponent, HeroDetailsComponent],
+  imports: [HeroList, HeroDetails],
   template: `
     <div class="container">
       <app-hero-list></app-hero-list>
@@ -53,7 +51,7 @@ import { HeroDetailsComponent } from "./hero-details.component";
     `,
   ],
 })
-export class AppComponent {}
+export class App {}
 ```
 
 აქ ყველა კომპონენტის მარკაპი, სტილები და ლოგიკა ერთ ფაილში გვაქვს მოქცეული.

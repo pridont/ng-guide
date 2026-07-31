@@ -20,26 +20,26 @@ title: "ვალიდაციის მესიჯები"
   <div class="form-block">
     <label for="name">Name</label>
     <input type="text" id="name" formControlName="name" />
-    <span *ngIf="controls['name'].invalid && controls['name'].dirty">
-      Must provide a proper name!
-    </span>
-    <span *ngIf="controls['name']?.errors?.['badName']">
-      {{ controls['name'].errors?.['badName']}}
-    </span>
+    @if (controls['name'].invalid && controls['name'].dirty) {
+      <span>Must provide a proper name!</span>
+    }
+    @if (controls['name']?.errors?.['badName']) {
+      <span>{{ controls['name'].errors?.['badName'] }}</span>
+    }
   </div>
   <div class="form-block">
     <label for="email">Email</label>
     <input type="email" id="email" formControlName="email" />
-    <span *ngIf="controls['email'].invalid && controls['email'].dirty">
-      Must provide a proper email!
-    </span>
+    @if (controls['email'].invalid && controls['email'].dirty) {
+      <span>Must provide a proper email!</span>
+    }
   </div>
   <div class="form-block">
     <label for="password">Password</label>
     <input type="password" id="password" formControlName="password" />
-    <span *ngIf="controls['password'].invalid && controls['password'].dirty">
-      Password is required!
-    </span>
+    @if (controls['password'].invalid && controls['password'].dirty) {
+      <span>Password is required!</span>
+    }
   </div>
   <button type="submit" [disabled]="signupForm.invalid">Submit</button>
 </form>
@@ -61,7 +61,7 @@ title: "ვალიდაციის მესიჯები"
 გამოვსახოთ, რომელიც ვალიდატორის ფუნქციაში შევქმენით. `?` გვჭირდება
 ყოველი თვისების წინ, რადგან შესაძლოა ისინი არ არსებობდნენ.
 
-### შეჯამება
+## შეჯამება
 
 ამ თავში ჩვენ ვისწავლეთ ანგულარის ვალიდატორების შესახებ, შევქმენით ჩვენი ვალიდატორიც
 და გამოვსახეთ ვალიდაციის მესიჯები.

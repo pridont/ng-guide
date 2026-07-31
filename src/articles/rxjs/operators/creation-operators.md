@@ -9,7 +9,7 @@ title: "Creation Operators"
 ან სულაც სტატიკური მონაცემები. ჩვენ ფაქტობრივად ყველაფრისგან შეგვიძლია
 სტრიმის შექმნა.
 
-### fromEvent
+## fromEvent
 
 `fromEvent`-ის საშუალებით შეგვიძლია რაიმე ელემენტზე (ან მთლიან დოკუმენტზე)
 არსებული მოვლენისგან სტრიმის შექმნა, სადაც ქოლბექში ფუნქცია დაგვიბრუნებს
@@ -20,17 +20,14 @@ title: "Creation Operators"
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { fromEvent } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // create an observable of mouse clicks on document
   myObservable$ = fromEvent(document, "click");
 
@@ -43,24 +40,21 @@ export class AppComponent implements OnInit {
 }
 ```
 
-### from
+## from
 
 `from` ოპერატორით შესაძლებელია array-ის, promise-ის ან iterable მონაცემისგან
 სტრიმის შექმნა. არგუმენტად ეს ოპერატორი სწორედ ასეთ მონაცემებს იღებს.
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { from } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   // emit array as a sequence of values
   numbers$ = from([1, 2, 3, 4, 5]);
 
@@ -77,24 +71,21 @@ export class AppComponent implements OnInit {
 ვალაგებთ მასივის ელემენტებს. დანიშნულების ადგილზეც ისინი შესაბამისად არა
 ერთდროულად, არამედ ერთი მეორის შემდეგ მივლენ.
 
-### of
+## of
 
 `of` ოპერატორი თანმიმდევრულად გასცემს ცვალებადი რაოდენობის მნიშვნელობებს,
 რომელიც მას არგუმენტად მიეწოდება.
 
 ```ts
 import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
 import { of } from "rxjs";
 
 @Component({
   selector: "app-root",
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: "./app.component.html",
-  styleUrls: ["./app.component.css"],
+  templateUrl: "./app.html",
+  styleUrl: "./app.css",
 })
-export class AppComponent implements OnInit {
+export class App implements OnInit {
   //emits values of any type
   values$ = of({ name: "Brian" }, [1, 2, 3], function hello() {
     return "Hello";
@@ -107,7 +98,7 @@ export class AppComponent implements OnInit {
 }
 ```
 
-### შეჯამება
+## შეჯამება
 
 ამ თავში ჩვენ განვიხილეთ შექმნის ოპერატორები, რომლებითაც საშუალება გვაქვს
 სტრიმები შევქმნათ ივენთებისა და სტატიკური მონაცემებისგან.

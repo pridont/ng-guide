@@ -20,15 +20,15 @@ title: "CanActivate (Route Guards)"
 
 ```ts
 import { HttpClient } from "@angular/common/http";
-import { inject, Injectable } from "@angular/core";
+import { inject, Service } from "@angular/core";
 import {
   ActivatedRouteSnapshot,
   CanActivateFn,
   Router,
   RouterStateSnapshot,
 } from "@angular/router";
-import { JwtHelperService } from "@auth0/angular-jwt";
 import { tap } from "rxjs";
+import { isTokenExpired } from "./jwt";
 
 interface LoginResponse {
   id: number;
@@ -41,13 +41,10 @@ interface LoginResponse {
   token: string;
 }
 
-@Injectable({ providedIn: "root" })
+@Service()
 export class AuthService {
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-    private jwtHelper: JwtHelperService
-  ) {}
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
   login(credentials: { username: string; password: string }) {
     return this.http
@@ -81,12 +78,12 @@ export class AuthService {
   }
 
   isTokenExpired() {
-    return this.jwtHelper.isTokenExpired();
+    return isTokenExpired(localStorage.getItem("access_token"));
   }
 
   canActivate() {
     if (this.isTokenExpired()) {
-      this.router.navigate(["/auth"]);
+      this.logout();
       return false;
     } else {
       return true;
@@ -102,16 +99,22 @@ export const canActivateCart: CanActivateFn = (
 };
 ```
 
-ყურადღება მივაქციოთ კლასში ბოლო ორ ფუნქციას. ჩვენ ამ სერვისში ვაინჯექთებთ `JwtHelperService`-ს,
-რომელსაც ჩვენ ტოკენზე აქვს წვდომა და მისი დეკოდიებაც შეუძლია. შესაბამისად შეგვიძლია გავიგოთ, ტოკენს
-ვადა გაუვიდა თუ არა. თუ ტოკენი საერთოდ არ არსებობს, ის მაშინაც `true`-ს დაგვიბრუნებს.
+ყურადღება მივაქციოთ კლასში ბოლო ორ ფუნქციას. ჩვენ აქ [წინა თავში](./jwt-authentication.html)
+შექმნილ `isTokenExpired` ფუნქციას ვიყენებთ, რომელიც ტოკენს განშიფრავს და მის
+`exp` ველს ამოწმებს. თუ ტოკენი საერთოდ არ არსებობს ან გაფუჭებულია, ის მაშინაც
+`true`-ს დაგვიბრუნებს და იგი "ვადაგასულად" ჩაითვლება.
+
 შესაბამისად შეგვიძლია შევქმნათ მეთოდი, რომელიც დაადგენს, შეიძლება თუ არა რაიმე მისამართის გააქტიურება.
-ამას ტოკენის არსებობისა და მისი ვადის მიხედვით დავადგენთ. თუ ის ამოწურულია, ჩვენ logout მეთოდს დავუძახებთ,
-რათა ძველი ტოკენი წაიშალოს და მომხმარებელი გადავამისამართოთ ანგარიშში შესვლის გვერდზე.
+ამას ტოკენის არსებობისა და მისი ვადის მიხედვით დავადგენთ. თუ ის ამოწურულია, ჩვენ `logout` მეთოდს დავუძახებთ,
+რომელიც ერთდროულად ორ საქმეს აკეთებს: ძველ ტოკენს მეხსიერებიდან შლის და
+მომხმარებელს გადაამისამართებს.
+
+**გახსოვდეთ:** ეს შემოწმება მხოლოდ მომხმარებლის კომფორტისთვისაა. კლიენტზე
+ტოკენის ხელმოწერას ვერ ვამოწმებთ, ამიტომ რეალურ დაცვას სერვერი უზრუნველყოფს და არა გარდი.
 
 ახლა იმავე ფაილიდან (თუმცა ეს ცალკე ფაილშიც შეგვიძლია) დავაექსპორტოთ ცვლადი, რომელიც
 იქნება `CanActivateFn` ტიპის. ამ ტიპის ფუნქციაში ხელმისაწვდომია `ActivatedRouteSnapshot` და
-`RouterStateSnapshot` რომელიც შეიძლება კონკრეტულ ვითარებაში დაგვჭირდეს, თუმცა ამ მაგალითში - არა.
+`RouterStateSnapshot` რომელიც შეიძლება კონკრეტულ ვითარებაში დაგვჭირდეს, თუმცა ამ მაგალითში — არა.
 ჩვენ ვაბრუნებთ `inject()` ფუნქციაზე დაძახებას, რომელიც `@angular/core`-იდან უნდა დავაიმპორტოთ.
 ეს მეთოდი აინჯექთებს სასურველი კლასის ინსტანციას და მასზე ახლა შეგვიძლია ჩვენთვის საჭირო
 მეთოდზე დაძახება, კერძოდ `canActivate`, რომელიც ტოკენს შეამოწმებს და სდათანადო boolean-ს დააბრუნებს.
@@ -122,17 +125,17 @@ export const canActivateCart: CanActivateFn = (
 
 ```ts
 import { Routes } from "@angular/router";
-import { AuthComponent } from "./auth/auth.component";
-import { LogoutComponent } from "./logout/logout.component";
-import { canActivateCart } from "./services/auth.service";
-import { ShoppingCartComponent } from "./shopping-cart/shopping-cart.component";
+import { Auth } from "./auth/auth";
+import { Logout } from "./logout/logout";
+import { canActivateCart } from "./services/auth-service";
+import { ShoppingCart } from "./shopping-cart/shopping-cart";
 
 export const routes: Routes = [
-  { path: "auth", component: AuthComponent },
-  { path: "logout", component: LogoutComponent },
+  { path: "auth", component: Auth },
+  { path: "logout", component: Logout },
   {
     path: "cart",
-    component: ShoppingCartComponent,
+    component: ShoppingCart,
     canActivate: [canActivateCart],
   },
   { path: "", redirectTo: "cart", pathMatch: "full" },
@@ -144,22 +147,29 @@ export const routes: Routes = [
 ანგარიშიდან გასვლა გადაგვიყვანს მთავარ გვერდზე, რომელმაც `cart`-ზე უნდა გადაგვამისამართოს,
 მაგრამ გარდი თავის მხრივ დაგვაბრუნებს ავთენტიფიკაციის გვერდზე.
 
-## CanActivate Class
+## CanActivate Class — ძველი მიდგომა
 
-ახლა განვიხილოთ depricated მიდგომა, რომელიც მალე მოხმარებაში აღარ იქნება,
-თუმცა ძველ პროექტებში შეიძლება მაინც შეგვხვდეს. გარდის შესაქმნელად ვქმნით
-ფაილს რომელსაც კონვენციურად `guard` უნდა ჰქონდეს, ანუ `auth.guard.ts`.
+ფუნქციური გარდები ანგულარის 15-ე ვერსიაში შემოვიდა. მათამდე გარდი
+კლასი იყო, და ეს მიდგომა ძველ პროექტებში ხშირად შეგვხვდება.
+
+გასათვალისწინებელია, რომ `CanActivate` ინტერფეისი **კვლავ მუშაობს** და
+ფორმალურად deprecated არ არის. მაგრამ CLI-ის `ng generate guard` დღეს
+ფუნქციურ გარდს ქმნის და ანგულარის დოკუმენტაციაც ფუნქციურ ვარიანტს
+ასწავლის, ამიტომ ახალ კოდში ის უნდა ვამჯობინოთ. ეს სექცია იმისთვისაა,
+რომ ძველი კოდი ამოიცნოთ.
+
+გარდის შესაქმნელად ვქმნით
+ფაილს რომელსაც კონვენციურად `guard` უნდა ჰქონდეს, ანუ `auth-guard.ts`.
 აქ ჩვენ `Injectable` დეკორატორით ვქმნით კლასს, რომელიც იმპლემენტაციას
 უკეთებს `CanActivate` ინტერფეისს. ამ ინტერფეისის თანახმად კლასს უნდა ჰქონდეს
-`canActivate` ფუნქცია. აქაც ფუნქციაში ხელმისაწვდომია `ActivatedRouteSnapshot`
-და `RouterStateSnapshot`. სხვა საჭირო კლასებს ჩვენ უბრალოდ კონსტრუქტორში
-ვაინჯექთებთ `inject` ფუნქციის გამოყენების მაგივრად. ახლა იგივე პრინციპით
+`canActivate` მეთოდი. აქაც მეთოდში ხელმისაწვდომია `ActivatedRouteSnapshot`
+და `RouterStateSnapshot`. ახლა იგივე პრინციპით
 ვიყენებთ `AuthService`-ში არსებულ მეთოდს, რომ ვნახოთ ტოკენს ვადა გაუვიდა
 თუ არა, და ამის მიხედვით, ერთი მხრივ მოხმარებელს გადავამისამართებთ და
 მეორე მხრივ დავაბრუნებთ ბულიანს, მისამართი გააქტიურდეს თუ არა.
 
 ```ts
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import {
   ActivatedRouteSnapshot,
   CanActivate,
@@ -167,13 +177,14 @@ import {
   RouterStateSnapshot,
   UrlTree,
 } from "@angular/router";
-import { AuthService } from "../services/auth.service";
+import { AuthService } from "../services/auth-service";
 
 @Injectable({
   providedIn: "root",
 })
 export class AuthGuard implements CanActivate {
-  constructor(private authService: AuthService, private router: Router) {}
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     if (this.authService.isTokenExpired()) {
@@ -190,17 +201,17 @@ export class AuthGuard implements CanActivate {
 
 ```ts
 import { Routes } from "@angular/router";
-import { AuthComponent } from "./auth/auth.component";
-import { AuthGuard } from "./guards/auth.guard";
-import { LogoutComponent } from "./logout/logout.component";
-import { ShoppingCartComponent } from "./shopping-cart/shopping-cart.component";
+import { Auth } from "./auth/auth";
+import { AuthGuard } from "./guards/auth-guard";
+import { Logout } from "./logout/logout";
+import { ShoppingCart } from "./shopping-cart/shopping-cart";
 
 export const routes: Routes = [
-  { path: "auth", component: AuthComponent },
-  { path: "logout", component: LogoutComponent },
+  { path: "auth", component: Auth },
+  { path: "logout", component: Logout },
   {
     path: "cart",
-    component: ShoppingCartComponent,
+    component: ShoppingCart,
     canActivate: [AuthGuard],
   },
   { path: "", redirectTo: "cart", pathMatch: "full" },
@@ -209,8 +220,9 @@ export const routes: Routes = [
 
 და ასე აპლიკაცია იგივენაირად იმუშავებს.
 
-### შეჯამება
+## შეჯამება
 
-ამ თავში ჩვენ განვიხილეთ `CanActivate` ტიპის ფუნქცია და კლასი,
-რომელიც იმას განსაზღვრავს, მომხმარებელს უნდა ჰქონდეს თუ არა საშუალება,
-რომ კონკრეტულ მისამართზე გადავიდეს.
+ამ თავში ჩვენ განვიხილეთ `CanActivateFn` ტიპის ფუნქცია და მისი ძველი,
+კლასზე დაფუძნებული ვარიანტი. ორივე იმას განსაზღვრავს, მომხმარებელს უნდა
+ჰქონდეს თუ არა საშუალება, რომ კონკრეტულ მისამართზე გადავიდეს.
+ახალ კოდში ფუნქციური გარდი უნდა გამოვიყენოთ.
