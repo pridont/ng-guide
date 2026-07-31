@@ -2,7 +2,7 @@
 
 # Angular Guide - ანგულარის (არაოფიციალური) ქართული გზამკვლევი
 
-[ეწვიეთ წიგნის ვებსაიტს](https://angular.pridontetradze.com)
+[ეწვიეთ წიგნის ვებსაიტს](https://angular.tetradze.com)
 
 ვებსაიტი არის სტატიკურად გენერირებული [11ty-ის დახმარებით](https://www.11ty.dev/).
 

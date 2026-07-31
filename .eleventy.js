@@ -52,6 +52,17 @@ module.exports = function (eleventyConfig) {
       .toLocaleString(DateTime.DATE_FULL);
   });
 
+  // Cloudflare serves the assets extensionless and redirects the `.html` form,
+  // so sitemap.xml must list the url the redirect lands on.
+  eleventyConfig.addFilter("canonical", (url) => url.replace(/\.html$/, ""));
+
+  // Same date as `updatedOn`, in the ISO form sitemap.xml expects.
+  eleventyConfig.addFilter("lastmod", (inputPath) => {
+    const date = gitDates.lastModified(inputPath);
+    if (!date) return null;
+    return DateTime.fromJSDate(date).toISODate();
+  });
+
   eleventyConfig.addFilter("editUrl", (inputPath) => {
     if (!inputPath) return REPO;
     return `${REPO}/edit/master/${inputPath.replace(/^\.\//, "")}`;
